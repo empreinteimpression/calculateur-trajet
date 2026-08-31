@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combien coûte réellement votre trajet ?</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #4da6ff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background-color: #2a2a2a;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4da6ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4da6ff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #3385ff;
+        }
+
+        .results {
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+            display: none;
+        }
+
+        .result-card {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .result-row.total {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #4da6ff;
+            border-top: 1px solid #444;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .comparison {
+            background-color: #1b2e1e;
+            border: 1px solid #2e5a32;
+        }
+
+        .comparison-title {
+            color: #66bb6a;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Combien coûte réellement un trajet en voiture ?</h1>
+
+        <form id="calc-form">
+            <div class="form-group">
+                <label for="depart">Ville de départ</label>
+                <input type="text" id="depart" placeholder="ex: Paris" required>
+            </div>
+
+            <div class="form-group">
+                <label for="destination">Ville de destination</label>
+                <input type="text" id="destination" placeholder="ex: Lyon" required>
+            </div>
+
+            <div class="form-group">
+                <label for="distance">Distance estimée (en km)</label>
+                <input type="number" id="distance" placeholder="ex: 460" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="conso">Consommation (L/100km ou kWh/100km)</label>
+                <input type="number" id="conso" step="0.1" placeholder="ex: 6.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="carburant">Type de carburant</label>
+                <select id="carburant">
+                    <option value="e10">Essence (E10)</option>
+                    <option value="diesel">Gazole / Diesel</option>
+                    <option value="e85">Superéthanol (E85)</option>
+                    <option value="elec">Électrique</option>
+                </select>
+            </div>
+
+            <button type="submit">Calculer le coût</button>
+        </form>
+
+        <div class="results" id="results">
+            <div class="result-card">
+                <div class="result-row">
+                    <span>Distance :</span>
+                    <span id="res-distance">0 km</span>
+                </div>
+                <div class="result-row">
+                    <span>Coût du carburant :</span>
+                    <span id="res-carburant">0,00 €</span>
+                </div>
+                <div class="result-row">
+                    <span>Péages (estimation) :</span>
+                    <span id="res-peage">0,00 €</span>
+                </div>
+                <div class="result-row total">
+                    <span>Coût total (Voiture) :</span>
+                    <span id="res-total">0,00 €</span>
+                </div>
+            </div>
+
+            <div class="result-card comparison">
+                <div class="comparison-title">Comparaison avec le Train</div>
+                <div class="result-row">
+                    <span>Prix moyen estimé (1 personne) :</span>
+                    <span id="res-train">0,00 €</span>
+                </div>
+                <div id="res-bilan" style="font-size: 0.85rem; margin-top: 8px; color: #aaa;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prix moyens indicatifs (en €/L ou €/kWh)
+        const PRIX_CARBURANT = {
+            e10: 1.85,
+            diesel: 1.75,
+            e85: 0.90,
+            elec: 0.25
+        };
+
+        // Estimation moyenne du coût de péage par km (~0.09€/km)
+        const COUT_PEAGE_PAR_KM = 0.09;
+
+        // Estimation moyenne du billet de train par km (~0.14€/km)
+        const COUT_TRAIN_PAR_KM = 0.14;
+
+        document.getElementById('calc-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const distance = parseFloat(document.getElementById('distance').value);
+            const conso = parseFloat(document.getElementById('conso').value);
+            const typeCarburant = document.getElementById('carburant').value;
+
+            // Calculs
+            const prixUnitaire = PRIX_CARBURANT[typeCarburant];
+            const coutCarburant = (distance / 100) * conso * prixUnitaire;
+            const coutPeage = distance * COUT_PEAGE_PAR_KM;
+            const coutTotalVoiture = coutCarburant + coutPeage;
+
+            const coutTrain = distance * COUT_TRAIN_PAR_KM;
+
+            // Affichage des résultats
+            document.getElementById('res-distance').innerText = distance + ' km';
+            document.getElementById('res-carburant').innerText = coutCarburant.toFixed(2) + ' €';
+            document.getElementById('res-peage').innerText = coutPeage.toFixed(2) + ' €';
+            document.getElementById('res-total').innerText = coutTotalVoiture.toFixed(2) + ' €';
+            document.getElementById('res-train').innerText = coutTrain.toFixed(2) + ' €';
+
+            const bilanEl = document.getElementById('res-bilan');
+            if (coutTotalVoiture < coutTrain) {
+                const diff = (coutTrain - coutTotalVoiture).toFixed(2);
+                bilanEl.innerText = `La voiture est environ ${diff} € moins chère qu'un billet de train solo pour ce trajet.`;
+            } else {
+                const diff = (coutTotalVoiture - coutTrain).toFixed(2);
+                bilanEl.innerText = `Le train est environ ${diff} € moins cher qu'un trajet en voiture solo.`;
+            }
+
+            document.getElementById('results').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

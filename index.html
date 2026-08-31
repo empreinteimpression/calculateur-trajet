@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-K9999VVZ');</script>
+    <!-- End Google Tag Manager -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculateur de Trajet : Coût, Péages, CO2 & Assurance Auto</title>
@@ -35,7 +43,6 @@
             --border: #e2e8f0;
             --text: #334155;
             --text-light: #64748b;
-            --accent-orange: #f59e0b;
         }
 
         * {
@@ -78,7 +85,7 @@
             padding: 0 1rem;
         }
 
-        /* Preset Chips */
+        /* Chips Trajets Populaires */
         .presets-bar {
             margin: 1.5rem 0;
             display: flex;
@@ -110,7 +117,7 @@
             background-color: #eff6ff;
         }
 
-        /* Grid Layout */
+        /* Layout Grid */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -123,7 +130,7 @@
             }
         }
 
-        /* Cards */
+        /* Cards Design */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -136,12 +143,9 @@
             font-size: 1.25rem;
             margin-bottom: 1.25rem;
             color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
-        /* Form */
+        /* Formulaires */
         .form-group {
             margin-bottom: 1.2rem;
         }
@@ -159,7 +163,6 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             font-size: 0.95rem;
-            transition: border-color 0.2s;
         }
 
         .form-control:focus {
@@ -177,8 +180,6 @@
             font-size: 1rem;
             cursor: pointer;
             text-align: center;
-            text-decoration: none;
-            transition: background 0.2s;
         }
 
         .btn-primary {
@@ -190,17 +191,7 @@
             background-color: var(--primary-hover);
         }
 
-        .btn-secondary {
-            background-color: #f1f5f9;
-            color: var(--dark);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-
-        /* Results Display */
+        /* Metrics Display */
         .results-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -226,10 +217,9 @@
             font-size: 0.8rem;
             color: var(--text-light);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        /* CO2 Comparison Table */
+        /* Comparatif CO2 */
         .co2-comparison {
             margin-top: 1.5rem;
         }
@@ -256,7 +246,7 @@
             border-radius: 4px;
         }
 
-        /* Affiliation & Partner Blocks */
+        /* Encadrés Affiliation */
         .affiliate-box {
             background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             border: 1px solid #bfdbfe;
@@ -278,7 +268,6 @@
 
         .affiliate-box p {
             font-size: 0.9rem;
-            color: var(--text);
             margin-bottom: 1rem;
         }
 
@@ -297,7 +286,7 @@
             background-color: var(--secondary);
         }
 
-        /* Share Tools */
+        /* Partage */
         .share-buttons {
             display: flex;
             gap: 0.5rem;
@@ -312,13 +301,9 @@
             background: white;
             cursor: pointer;
             font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
         }
 
-        /* SEO Content Section */
+        /* Section SEO Footer */
         .seo-content {
             margin-top: 3rem;
             background: white;
@@ -327,29 +312,17 @@
             border: 1px solid var(--border);
         }
 
-        .seo-content h2 {
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-
-        .seo-content h3 {
-            margin: 1.2rem 0 0.5rem 0;
-            color: var(--dark);
-        }
-
-        .faq-item {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .faq-question {
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-        }
+        .seo-content h2 { margin-bottom: 1rem; color: var(--dark); }
+        .seo-content h3 { margin: 1.2rem 0 0.5rem 0; color: var(--dark); }
+        .faq-item { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; }
+        .faq-question { font-weight: 600; }
     </style>
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K9999VVZ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <header>
         <div class="container">
@@ -416,7 +389,7 @@
 
             <!-- Résultats et Comparatifs -->
             <section class="card">
-                <h2>📊 Récapitulatif du Trajet <span id="routeTitle" style="font-size:0.9rem; font-weight:normal; color:var(--text-light);">(Paris ➔ Lyon)</span></h2>
+                <h2>📊 Récapitulatif <span id="routeTitle" style="font-size:0.9rem; font-weight:normal; color:var(--text-light);">(Paris ➔ Lyon)</span></h2>
                 
                 <div class="results-summary">
                     <div class="metric-box">
@@ -437,7 +410,7 @@
                     </div>
                 </div>
 
-                <!-- Comparatif Écologique Multi-Modal -->
+                <!-- Comparatif Écologique -->
                 <h3>🌱 Comparatif Empreinte CO2</h3>
                 <div class="co2-comparison">
                     <div class="co2-row">
@@ -450,7 +423,7 @@
 
                     <div class="co2-row">
                         <div>
-                            <strong>Voiture Électrique (Mix FR)</strong>
+                            <strong>Voiture Électrique (FR)</strong>
                             <div class="co2-bar-container"><div id="barElec" class="co2-bar" style="width: 20%; background: #f59e0b;"></div></div>
                         </div>
                         <span id="valElec">17 kg CO2</span>
@@ -474,49 +447,47 @@
                     </div>
                 </div>
 
-                <!-- BLOC AFFILIATION 1 : Comparateur d'Assurance Auto -->
+                <!-- MONÉTISATION 1 : Assurance Auto -->
                 <div class="affiliate-box insurance">
                     <h3>🛡️ Prêt pour les longs trajets ?</h3>
-                    <p>Assurez-vous d'être bien protégé (assistance panne 0 km, prêt de véhicule). Comparez les meilleures assurances auto et économisez jusqu'à 350€/an.</p>
-                    <a href="https://example-assurance-affiliate-link.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn green">Comparer les Assurances Auto ➔</a>
+                    <p>Pensez à l'assistance panne 0 km. Comparez les meilleures assurances auto et économisez jusqu'à 350€/an.</p>
+                    <a href="https://votre-lien-affiliation-assurance.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn green">Comparer les Assurances Auto ➔</a>
                 </div>
 
-                <!-- BLOC AFFILIATION 2 : Télépéage -->
+                <!-- MONÉTISATION 2 : Télépéage -->
                 <div class="affiliate-box">
-                    <h3>⚡ Évitez les files aux péages</h3>
-                    <p>Passez les péages sans vous arrêter avec le badge Télépéage Ulys. Obtenez jusqu'à 12 mois d'abonnement offerts.</p>
-                    <a href="https://example-telepeage-affiliate-link.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn">Obtenir le Badge Télépéage ➔</a>
+                    <h3>⚡ Évitez les files d'attente aux péages</h3>
+                    <p>Passez sans vous arrêter avec le badge Télépéage Ulys. 12 mois offerts avec notre lien partenaire.</p>
+                    <a href="https://votre-lien-affiliation-telepeage.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn">Obtenir le Badge Télépéage ➔</a>
                 </div>
             </section>
         </div>
 
-        <!-- SEO & Contenu éditorial -->
+        <!-- Section SEO Éditoriale -->
         <article class="seo-content">
-            <h2>Comment optimiser les coûts et le CO2 de votre trajet ?</h2>
-            <p>Lors de la préparation d'un voyage longue distance en France ou en Europe, le calcul précis du budget essence et péages est indispensable. Utilisez notre outil pour anticiper vos dépenses et faire un choix éco-responsable.</p>
+            <h2>Comment bien préparer son budget trajet et réduire son empreinte carbone ?</h2>
+            <p>Anticiper le coût de ses voyages en voiture permet de faire de réelles économies tout en évaluant l'impact environnemental de ses déplacements.</p>
 
-            <h3>Conseils pour réduire l'empreinte carbone en voiture</h3>
+            <h3>Conseils pour réduire sa consommation d'essence</h3>
             <ul>
-                <li><strong>Adoptez l'éco-conduite :</strong> Réduire sa vitesse de 130 km/h à 120 km/h sur autoroute permet d'économiser jusqu'à 5L de carburant et de réduire de 20% les émissions de CO2.</li>
-                <li><strong>Vérifiez la pression des pneus :</strong> Des pneus sous-gonflés augmentent la consommation de carburant de 3%.</li>
-                <li><strong>Pratiquez le covoiturage :</strong> Partager son véhicule avec 2 passagers divise les frais et l'impact carbone individuel par 3.</li>
+                <li><strong>Diminuez votre vitesse :</strong> Rouler à 120 km/h au lieu de 130 km/h sur autoroute permet de réduire votre consommation de carburant de 15% à 20%.</li>
+                <li><strong>Pression des pneus :</strong> Un pneu sous-gonflé augmente le risque d'éclatement et génère une surconsommation d'essence.</li>
             </ul>
 
             <h3 style="margin-top:1.5rem;">Foire Aux Questions (FAQ)</h3>
             <div class="faq-item">
-                <div class="faq-question">Comment sont calculées les émissions de CO2 ?</div>
-                <div class="faq-answer">Nous utilisons les facteurs d'émission moyens recommandés par l'ADEME : environ 190g CO2/km pour un véhicule thermique, 37g pour un véhicule électrique en France, et 2.6g CO2/km/voyageur pour le TGV.</div>
+                <div class="faq-question">Comment est calculée l'empreinte CO2 ?</div>
+                <div class="faq-answer">Le calcul s'appuie sur les données officielles de l'ADEME (Base Carbone).</div>
             </div>
             <div class="faq-item">
-                <div class="faq-question">Pourquoi comparer son assurance auto avant un grand trajet ?</div>
-                <div class="faq-answer">Une panne sur autoroute peut rapidement devenir très coûteuse sans la garantie assistance 0 km. Vérifier les clauses de son contrat d'assurance garantit un voyage en toute sérénité.</div>
+                <div class="faq-question">Pourquoi souscrire une assurance auto avec assistance 0 km ?</div>
+                <div class="faq-answer">En cas de panne sur autoroute, la prise en charge peut être très coûteuse sans option d'assistance adaptée dans votre contrat.</div>
             </div>
         </article>
 
     </main>
 
     <script>
-        // Logique de calcul
         function calculateRoute() {
             const dep = document.getElementById('dep').value;
             const arr = document.getElementById('arr').value;
@@ -525,29 +496,22 @@
             const motor = document.getElementById('motor').value;
             const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
 
-            let consump = 7.0; // L/100km par defaut
-            let co2Factor = 0.190; // kg CO2 par km par defaut
+            let consump = 7.0;
+            let co2Factor = 0.190;
 
-            if (motor === 'diesel') {
-                consump = 5.8;
-                co2Factor = 0.170;
-            } else if (motor === 'elec') {
-                consump = 18; // kWh/100km
-                co2Factor = 0.037; // Mix FR
-            }
+            if (motor === 'diesel') { consump = 5.8; co2Factor = 0.170; }
+            else if (motor === 'elec') { consump = 18; co2Factor = 0.037; }
 
             const fuelCost = (dist / 100) * consump * fuelPrice;
             const totalCost = fuelCost + peage;
             const co2Total = dist * co2Factor;
 
-            // Update Text
             document.getElementById('routeTitle').innerText = `(${dep} ➔ ${arr})`;
             document.getElementById('resTotalCost').innerText = totalCost.toFixed(2) + ' €';
             document.getElementById('resFuelCost').innerText = fuelCost.toFixed(2) + ' €';
             document.getElementById('resPeage').innerText = peage.toFixed(2) + ' €';
             document.getElementById('resCO2').innerText = Math.round(co2Total) + ' kg';
 
-            // Multi-modal comparison
             const co2Therm = Math.round(dist * 0.190);
             const co2Elec = Math.round(dist * 0.037);
             const co2Train = Math.round(dist * 0.0026);
@@ -556,54 +520,10 @@
             document.getElementById('valElec').innerText = co2Elec + ' kg CO2';
             document.getElementById('valTrain').innerText = co2Train + ' kg CO2';
 
-            // Bars scaling
             const maxCO2 = Math.max(co2Therm, 1);
             document.getElementById('barThermique').style.width = '100%';
             document.getElementById('barElec').style.width = Math.max(5, (co2Elec / maxCO2) * 100) + '%';
             document.getElementById('barTrain').style.width = Math.max(2, (co2Train / maxCO2) * 100) + '%';
 
-            // Update URL without refresh
             const url = new URL(window.location);
             url.searchParams.set('dep', dep);
-            url.searchParams.set('arr', arr);
-            url.searchParams.set('dist', dist);
-            url.searchParams.set('peage', peage);
-            window.history.pushState({}, '', url);
-        }
-
-        function setPreset(dep, arr, dist, peage) {
-            document.getElementById('dep').value = dep;
-            document.getElementById('arr').value = arr;
-            document.getElementById('dist').value = dist;
-            document.getElementById('peage').value = peage;
-            calculateRoute();
-        }
-
-        function copySummary() {
-            const dep = document.getElementById('dep').value;
-            const arr = document.getElementById('arr').value;
-            const cost = document.getElementById('resTotalCost').innerText;
-            const co2 = document.getElementById('resCO2').innerText;
-
-            const text = `Trajet ${dep} -> ${arr} | Coût estimé : ${cost} | Empreinte CO2 : ${co2}. Calculé sur notre outil.`;
-            navigator.clipboard.writeText(text);
-            alert('Résumé copié dans le presse-papier !');
-        }
-
-        function shareURL() {
-            navigator.clipboard.writeText(window.location.href);
-            alert('Lien du trajet copié dans le presse-papier !');
-        }
-
-        // Init page with URL parameters if present
-        window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            if (params.has('dep')) document.getElementById('dep').value = params.get('dep');
-            if (params.has('arr')) document.getElementById('arr').value = params.get('arr');
-            if (params.has('dist')) document.getElementById('dist').value = params.get('dist');
-            if (params.has('peage')) document.getElementById('peage').value = params.get('peage');
-            calculateRoute();
-        });
-    </script>
-</body>
-</html>

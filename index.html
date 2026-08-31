@@ -3,336 +3,606 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combien coûte réellement votre trajet ?</title>
+    <title>Calculateur de Trajet : Coût, Péages, CO2 & Assurance Auto</title>
+    <meta name="description" content="Calculez le coût précis de votre trajet en voiture (carburant, péages), comparez l'empreinte carbone CO2 et découvrez les meilleures offres d'assurance et télépéage.">
+    
+    <!-- Open Graph / Meta Partage -->
+    <meta property="og:title" content="Calculateur de Trajet & Empreinte CO2">
+    <meta property="og:description" content="Estimez votre budget trajet, comparez le CO2 et optimisez vos voyages.">
+    <meta property="og:type" content="website">
+
+    <!-- Schema.org JSON-LD pour le SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Calculateur de Trajet & CO2",
+      "url": "https://empreinteimpression.github.io/calculateur-trajet/",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "All",
+      "description": "Calcul de coût de trajet, péages, empreinte carbone et comparaison d'assurances."
+    }
+    </script>
+
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #10b981;
+            --dark: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #334155;
+            --text-light: #64748b;
+            --accent-orange: #f59e0b;
+        }
+
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: #121212;
+            background-color: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
             color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .container {
-            max-width: 600px;
-            width: 100%;
-            background-color: #1e1e1e;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            color: #4da6ff;
+        /* Preset Chips */
+        .presets-bar {
+            margin: 1.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
+        .presets-title {
+            font-weight: 600;
             font-size: 0.9rem;
-            color: #ccc;
+            color: var(--text-light);
+            margin-right: 0.5rem;
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #333;
-            border-radius: 6px;
-            background-color: #2a2a2a;
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #4da6ff;
-        }
-
-        /* Liste de suggestions autoplace */
-        .suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 0 0 6px 6px;
-            max-height: 150px;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .suggestion-item {
-            padding: 8px 12px;
-            cursor: pointer;
+        .chip {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
             font-size: 0.85rem;
-            border-bottom: 1px solid #333;
-        }
-
-        .suggestion-item:hover {
-            background-color: #4da6ff;
-            color: white;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4da6ff;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: #eff6ff;
+        }
+
+        /* Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 850px) {
+            .main-grid {
+                grid-template-columns: 380px 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.25rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
             transition: background 0.2s;
         }
 
-        button:hover {
-            background-color: #3385ff;
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
         }
 
-        .results {
-            margin-top: 30px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-            display: none;
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
         }
 
-        .result-card {
-            background-color: #2a2a2a;
-            padding: 15px;
+        .btn-secondary {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* Results Display */
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
             border-radius: 8px;
-            margin-bottom: 12px;
+            padding: 1rem;
+            text-align: center;
         }
 
-        .result-row {
+        .metric-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* CO2 Comparison Table */
+        .co2-comparison {
+            margin-top: 1.5rem;
+        }
+
+        .co2-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--border);
         }
 
-        .result-row.total {
-            font-weight: bold;
+        .co2-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .co2-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        /* Affiliation & Partner Blocks */
+        .affiliate-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .affiliate-box.insurance {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-color: #a7f3d0;
+        }
+
+        .affiliate-box h3 {
             font-size: 1.1rem;
-            color: #4da6ff;
-            border-top: 1px solid #444;
-            padding-top: 8px;
-            margin-top: 8px;
+            color: var(--dark);
+            margin-bottom: 0.4rem;
         }
 
-        .comparison {
-            background-color: #1b2e1e;
-            border: 1px solid #2e5a32;
-        }
-
-        .comparison-title {
-            color: #66bb6a;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .loading {
-            text-align: center;
+        .affiliate-box p {
             font-size: 0.9rem;
-            color: #aaa;
-            margin-top: 10px;
-            display: none;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .affiliate-btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .affiliate-btn.green {
+            background-color: var(--secondary);
+        }
+
+        /* Share Tools */
+        .share-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        /* SEO Content Section */
+        .seo-content {
+            margin-top: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .seo-content h2 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .seo-content h3 {
+            margin: 1.2rem 0 0.5rem 0;
+            color: var(--dark);
+        }
+
+        .faq-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .faq-question {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Combien coûte réellement votre trajet ?</h1>
-
-        <form id="calc-form">
-            <div class="form-group">
-                <label for="depart">Départ (adresse ou ville)</label>
-                <input type="text" id="depart" placeholder="ex: Paris" autocomplete="off" required>
-                <div id="sug-depart" class="suggestions" style="display:none;"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="destination">Destination (adresse ou ville)</label>
-                <input type="text" id="destination" placeholder="ex: Lyon" autocomplete="off" required>
-                <div id="sug-destination" class="suggestions" style="display:none;"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="conso">Consommation (L/100km ou kWh/100km)</label>
-                <input type="number" id="conso" step="0.1" placeholder="ex: 6.5" required>
-            </div>
-
-            <div class="form-group">
-                <label for="carburant">Type de carburant</label>
-                <select id="carburant">
-                    <option value="e10">Essence (E10)</option>
-                    <option value="diesel">Gazole / Diesel</option>
-                    <option value="e85">Superéthanol (E85)</option>
-                    <option value="elec">Électrique</option>
-                </select>
-            </div>
-
-            <button type="submit">Calculer le trajet</button>
-            <div id="loading" class="loading">Calcul de la distance par la route en cours...</div>
-        </form>
-
-        <div class="results" id="results">
-            <div class="result-card">
-                <div class="result-row">
-                    <span>Distance (route) :</span>
-                    <span id="res-distance">0 km</span>
-                </div>
-                <div class="result-row">
-                    <span>Coût du carburant :</span>
-                    <span id="res-carburant">0,00 €</span>
-                </div>
-                <div class="result-row">
-                    <span>Péages (estimation) :</span>
-                    <span id="res-peage">0,00 €</span>
-                </div>
-                <div class="result-row total">
-                    <span>Coût total (Voiture) :</span>
-                    <span id="res-total">0,00 €</span>
-                </div>
-            </div>
-
-            <div class="result-card comparison">
-                <div class="comparison-title">Comparaison avec le Train</div>
-                <div class="result-row">
-                    <span>Prix moyen estimé (1 personne) :</span>
-                    <span id="res-train">0,00 €</span>
-                </div>
-                <div id="res-bilan" style="font-size: 0.85rem; margin-top: 8px; color: #aaa;"></div>
-            </div>
+    <header>
+        <div class="container">
+            <h1>Calculateur de Trajet & Empreinte CO2</h1>
+            <p>Calculez précisément le coût (carburant, péages), comparez les impacts écologiques et optimisez votre budget route.</p>
         </div>
-    </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Trajets populaires pré-remplis -->
+        <div class="presets-bar">
+            <span class="presets-title">Trajets populaires :</span>
+            <button class="chip" onclick="setPreset('Paris', 'Lyon', 465, 38.5)">Paris ➔ Lyon</button>
+            <button class="chip" onclick="setPreset('Marseille', 'Nice', 200, 19.2)">Marseille ➔ Nice</button>
+            <button class="chip" onclick="setPreset('Toulouse', 'Bordeaux', 245, 21.0)">Toulouse ➔ Bordeaux</button>
+            <button class="chip" onclick="setPreset('Paris', 'Nantes', 385, 31.8)">Paris ➔ Nantes</button>
+            <button class="chip" onclick="setPreset('Lille', 'Paris', 220, 17.5)">Lille ➔ Paris</button>
+        </div>
+
+        <div class="main-grid">
+
+            <!-- Formulaire de Saisie -->
+            <section class="card">
+                <h2>🚗 Votre Itinéraire</h2>
+                <form id="routeForm" onsubmit="event.preventDefault(); calculateRoute();">
+                    <div class="form-group">
+                        <label for="dep">Ville de Départ</label>
+                        <input type="text" id="dep" class="form-control" value="Paris" placeholder="Ex: Paris" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="arr">Ville d'Arrivée</label>
+                        <input type="text" id="arr" class="form-control" value="Lyon" placeholder="Ex: Lyon" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dist">Distance estimée (km)</label>
+                        <input type="number" id="dist" class="form-control" value="465" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="peage">Péages estimés (€)</label>
+                        <input type="number" step="0.1" id="peage" class="form-control" value="38.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motor">Motorisation</label>
+                        <select id="motor" class="form-control">
+                            <option value="essence">Essence (7.0 L / 100km)</option>
+                            <option value="diesel">Diesel (5.8 L / 100km)</option>
+                            <option value="elec">Électrique (18 kWh / 100km)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelPrice">Prix du carburant/kWh (€)</label>
+                        <input type="number" step="0.01" id="fuelPrice" class="form-control" value="1.85">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Calculer le Trajet</button>
+                </form>
+            </section>
+
+            <!-- Résultats et Comparatifs -->
+            <section class="card">
+                <h2>📊 Récapitulatif du Trajet <span id="routeTitle" style="font-size:0.9rem; font-weight:normal; color:var(--text-light);">(Paris ➔ Lyon)</span></h2>
+                
+                <div class="results-summary">
+                    <div class="metric-box">
+                        <div class="metric-value" id="resTotalCost">101.40 €</div>
+                        <div class="metric-label">Coût Total</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="resFuelCost">62.90 €</div>
+                        <div class="metric-label">Carburant</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="resPeage">38.50 €</div>
+                        <div class="metric-label">Péage</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="resCO2">87 kg</div>
+                        <div class="metric-label">CO2 Émis</div>
+                    </div>
+                </div>
+
+                <!-- Comparatif Écologique Multi-Modal -->
+                <h3>🌱 Comparatif Empreinte CO2</h3>
+                <div class="co2-comparison">
+                    <div class="co2-row">
+                        <div>
+                            <strong>Voiture Thermique</strong>
+                            <div class="co2-bar-container"><div id="barThermique" class="co2-bar" style="width: 100%; background: #ef4444;"></div></div>
+                        </div>
+                        <span id="valThermique">87 kg CO2</span>
+                    </div>
+
+                    <div class="co2-row">
+                        <div>
+                            <strong>Voiture Électrique (Mix FR)</strong>
+                            <div class="co2-bar-container"><div id="barElec" class="co2-bar" style="width: 20%; background: #f59e0b;"></div></div>
+                        </div>
+                        <span id="valElec">17 kg CO2</span>
+                    </div>
+
+                    <div class="co2-row">
+                        <div>
+                            <strong>Train / TGV</strong>
+                            <div class="co2-bar-container"><div id="barTrain" class="co2-bar" style="width: 4%; background: #10b981;"></div></div>
+                        </div>
+                        <span id="valTrain">1.2 kg CO2</span>
+                    </div>
+                </div>
+
+                <!-- Partage facile -->
+                <div style="margin-top: 1.5rem;">
+                    <label style="font-size:0.85rem; font-weight:600;">Partager ce résultat :</label>
+                    <div class="share-buttons">
+                        <button class="share-btn" onclick="copySummary()">📋 Copier le résumé</button>
+                        <button class="share-btn" onclick="shareURL()">🔗 Lien direct</button>
+                    </div>
+                </div>
+
+                <!-- BLOC AFFILIATION 1 : Comparateur d'Assurance Auto -->
+                <div class="affiliate-box insurance">
+                    <h3>🛡️ Prêt pour les longs trajets ?</h3>
+                    <p>Assurez-vous d'être bien protégé (assistance panne 0 km, prêt de véhicule). Comparez les meilleures assurances auto et économisez jusqu'à 350€/an.</p>
+                    <a href="https://example-assurance-affiliate-link.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn green">Comparer les Assurances Auto ➔</a>
+                </div>
+
+                <!-- BLOC AFFILIATION 2 : Télépéage -->
+                <div class="affiliate-box">
+                    <h3>⚡ Évitez les files aux péages</h3>
+                    <p>Passez les péages sans vous arrêter avec le badge Télépéage Ulys. Obtenez jusqu'à 12 mois d'abonnement offerts.</p>
+                    <a href="https://example-telepeage-affiliate-link.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn">Obtenir le Badge Télépéage ➔</a>
+                </div>
+            </section>
+        </div>
+
+        <!-- SEO & Contenu éditorial -->
+        <article class="seo-content">
+            <h2>Comment optimiser les coûts et le CO2 de votre trajet ?</h2>
+            <p>Lors de la préparation d'un voyage longue distance en France ou en Europe, le calcul précis du budget essence et péages est indispensable. Utilisez notre outil pour anticiper vos dépenses et faire un choix éco-responsable.</p>
+
+            <h3>Conseils pour réduire l'empreinte carbone en voiture</h3>
+            <ul>
+                <li><strong>Adoptez l'éco-conduite :</strong> Réduire sa vitesse de 130 km/h à 120 km/h sur autoroute permet d'économiser jusqu'à 5L de carburant et de réduire de 20% les émissions de CO2.</li>
+                <li><strong>Vérifiez la pression des pneus :</strong> Des pneus sous-gonflés augmentent la consommation de carburant de 3%.</li>
+                <li><strong>Pratiquez le covoiturage :</strong> Partager son véhicule avec 2 passagers divise les frais et l'impact carbone individuel par 3.</li>
+            </ul>
+
+            <h3 style="margin-top:1.5rem;">Foire Aux Questions (FAQ)</h3>
+            <div class="faq-item">
+                <div class="faq-question">Comment sont calculées les émissions de CO2 ?</div>
+                <div class="faq-answer">Nous utilisons les facteurs d'émission moyens recommandés par l'ADEME : environ 190g CO2/km pour un véhicule thermique, 37g pour un véhicule électrique en France, et 2.6g CO2/km/voyageur pour le TGV.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Pourquoi comparer son assurance auto avant un grand trajet ?</div>
+                <div class="faq-answer">Une panne sur autoroute peut rapidement devenir très coûteuse sans la garantie assistance 0 km. Vérifier les clauses de son contrat d'assurance garantit un voyage en toute sérénité.</div>
+            </div>
+        </article>
+
+    </main>
 
     <script>
-        const PRIX_CARBURANT = { e10: 1.85, diesel: 1.75, e85: 0.90, elec: 0.25 };
-        const COUT_PEAGE_PAR_KM = 0.09;
-        const COUT_TRAIN_PAR_KM = 0.14;
+        // Logique de calcul
+        function calculateRoute() {
+            const dep = document.getElementById('dep').value;
+            const arr = document.getElementById('arr').value;
+            const dist = parseFloat(document.getElementById('dist').value) || 0;
+            const peage = parseFloat(document.getElementById('peage').value) || 0;
+            const motor = document.getElementById('motor').value;
+            const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
 
-        let coordDepart = null;
-        let coordDestination = null;
+            let consump = 7.0; // L/100km par defaut
+            let co2Factor = 0.190; // kg CO2 par km par defaut
 
-        // Fonction d'autocomplétion (Nominatim - OpenStreetMap)
-        function setupAutocomplete(inputId, suggestionsId, onSelect) {
-            const input = document.getElementById(inputId);
-            const sugBox = document.getElementById(suggestionsId);
-            let timeout = null;
+            if (motor === 'diesel') {
+                consump = 5.8;
+                co2Factor = 0.170;
+            } else if (motor === 'elec') {
+                consump = 18; // kWh/100km
+                co2Factor = 0.037; // Mix FR
+            }
 
-            input.addEventListener('input', () => {
-                clearTimeout(timeout);
-                const query = input.value.trim();
+            const fuelCost = (dist / 100) * consump * fuelPrice;
+            const totalCost = fuelCost + peage;
+            const co2Total = dist * co2Factor;
 
-                if (query.length < 3) {
-                    sugBox.style.display = 'none';
-                    return;
-                }
+            // Update Text
+            document.getElementById('routeTitle').innerText = `(${dep} ➔ ${arr})`;
+            document.getElementById('resTotalCost').innerText = totalCost.toFixed(2) + ' €';
+            document.getElementById('resFuelCost').innerText = fuelCost.toFixed(2) + ' €';
+            document.getElementById('resPeage').innerText = peage.toFixed(2) + ' €';
+            document.getElementById('resCO2').innerText = Math.round(co2Total) + ' kg';
 
-                timeout = setTimeout(() => {
-                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
-                        .then(res => res.json())
-                        .then(data => {
-                            sugBox.innerHTML = '';
-                            if (data.length === 0) {
-                                sugBox.style.display = 'none';
-                                return;
-                            }
-                            data.forEach(place => {
-                                const div = document.createElement('div');
-                                div.className = 'suggestion-item';
-                                div.innerText = place.display_name;
-                                div.addEventListener('click', () => {
-                                    input.value = place.display_name;
-                                    sugBox.style.display = 'none';
-                                    onSelect({ lon: place.lon, lat: place.lat });
-                                });
-                                sugBox.appendChild(div);
-                            });
-                            sugBox.style.display = 'block';
-                        });
-                }, 300);
-            });
+            // Multi-modal comparison
+            const co2Therm = Math.round(dist * 0.190);
+            const co2Elec = Math.round(dist * 0.037);
+            const co2Train = Math.round(dist * 0.0026);
 
-            document.addEventListener('click', (e) => {
-                if (e.target !== input) sugBox.style.display = 'none';
-            });
+            document.getElementById('valThermique').innerText = co2Therm + ' kg CO2';
+            document.getElementById('valElec').innerText = co2Elec + ' kg CO2';
+            document.getElementById('valTrain').innerText = co2Train + ' kg CO2';
+
+            // Bars scaling
+            const maxCO2 = Math.max(co2Therm, 1);
+            document.getElementById('barThermique').style.width = '100%';
+            document.getElementById('barElec').style.width = Math.max(5, (co2Elec / maxCO2) * 100) + '%';
+            document.getElementById('barTrain').style.width = Math.max(2, (co2Train / maxCO2) * 100) + '%';
+
+            // Update URL without refresh
+            const url = new URL(window.location);
+            url.searchParams.set('dep', dep);
+            url.searchParams.set('arr', arr);
+            url.searchParams.set('dist', dist);
+            url.searchParams.set('peage', peage);
+            window.history.pushState({}, '', url);
         }
 
-        setupAutocomplete('depart', 'sug-depart', coords => coordDepart = coords);
-        setupAutocomplete('destination', 'sug-destination', coords => coordDestination = coords);
+        function setPreset(dep, arr, dist, peage) {
+            document.getElementById('dep').value = dep;
+            document.getElementById('arr').value = arr;
+            document.getElementById('dist').value = dist;
+            document.getElementById('peage').value = peage;
+            calculateRoute();
+        }
 
-        document.getElementById('calc-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        function copySummary() {
+            const dep = document.getElementById('dep').value;
+            const arr = document.getElementById('arr').value;
+            const cost = document.getElementById('resTotalCost').innerText;
+            const co2 = document.getElementById('resCO2').innerText;
 
-            if (!coordDepart || !coordDestination) {
-                alert("Veuillez sélectionner le départ et la destination dans les propositions de la liste.");
-                return;
-            }
+            const text = `Trajet ${dep} -> ${arr} | Coût estimé : ${cost} | Empreinte CO2 : ${co2}. Calculé sur notre outil.`;
+            navigator.clipboard.writeText(text);
+            alert('Résumé copié dans le presse-papier !');
+        }
 
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('results').style.display = 'none';
+        function shareURL() {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Lien du trajet copié dans le presse-papier !');
+        }
 
-            try {
-                // Calcul de la distance réelle par la route via OSRM
-                const url = `https://router.project-osrm.org/route/v1/driving/${coordDepart.lon},${coordDepart.lat};${coordDestination.lon},${coordDestination.lat}?overview=false`;
-                const res = await fetch(url);
-                const data = await res.json();
-
-                if (!data.routes || data.routes.length === 0) {
-                    alert("Impossible de calculer l'itinéraire entre ces deux points.");
-                    return;
-                }
-
-                const distanceKm = Math.round(data.routes[0].distance / 1000);
-                const conso = parseFloat(document.getElementById('conso').value);
-                const typeCarburant = document.getElementById('carburant').value;
-
-                const prixUnitaire = PRIX_CARBURANT[typeCarburant];
-                const coutCarburant = (distanceKm / 100) * conso * prixUnitaire;
-                const coutPeage = distanceKm * COUT_PEAGE_PAR_KM;
-                const coutTotalVoiture = coutCarburant + coutPeage;
-                const coutTrain = distanceKm * COUT_TRAIN_PAR_KM;
-
-                document.getElementById('res-distance').innerText = distanceKm + ' km';
-                document.getElementById('res-carburant').innerText = coutCarburant.toFixed(2) + ' €';
-                document.getElementById('res-peage').innerText = coutPeage.toFixed(2) + ' €';
-                document.getElementById('res-total').innerText = coutTotalVoiture.toFixed(2) + ' €';
-                document.getElementById('res-train').innerText = coutTrain.toFixed(2) + ' €';
-
-                const bilanEl = document.getElementById('res-bilan');
-                if (coutTotalVoiture < coutTrain) {
-                    const diff = (coutTrain - coutTotalVoiture).toFixed(2);
-                    bilanEl.innerText = `La voiture est environ ${diff} € moins chère qu'un billet de train solo pour ce trajet.`;
-                } else {
-                    const diff = (coutTotalVoiture - coutTrain).toFixed(2);
-                    bilanEl.innerText = `Le train est environ ${diff} € moins cher qu'un trajet en voiture solo.`;
-                }
-
-                document.getElementById('results').style.display = 'block';
-            } catch (err) {
-                alert("Erreur lors de la récupération du trajet.");
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+        // Init page with URL parameters if present
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('dep')) document.getElementById('dep').value = params.get('dep');
+            if (params.has('arr')) document.getElementById('arr').value = params.get('arr');
+            if (params.has('dist')) document.getElementById('dist').value = params.get('dist');
+            if (params.has('peage')) document.getElementById('peage').value = params.get('peage');
+            calculateRoute();
         });
     </script>
 </body>

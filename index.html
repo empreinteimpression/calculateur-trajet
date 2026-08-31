@@ -37,6 +37,7 @@
 
         .form-group {
             margin-bottom: 15px;
+            position: relative;
         }
 
         label {
@@ -59,6 +60,32 @@
         input:focus, select:focus {
             outline: none;
             border-color: #4da6ff;
+        }
+
+        /* Liste de suggestions autoplace */
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 0 0 6px 6px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .suggestion-item:hover {
+            background-color: #4da6ff;
+            color: white;
         }
 
         button {
@@ -119,27 +146,32 @@
             font-weight: bold;
             margin-bottom: 8px;
         }
+
+        .loading {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Combien coûte réellement un trajet en voiture ?</h1>
+        <h1>Combien coûte réellement votre trajet ?</h1>
 
         <form id="calc-form">
             <div class="form-group">
-                <label for="depart">Ville de départ</label>
-                <input type="text" id="depart" placeholder="ex: Paris" required>
+                <label for="depart">Départ (adresse ou ville)</label>
+                <input type="text" id="depart" placeholder="ex: Paris" autocomplete="off" required>
+                <div id="sug-depart" class="suggestions" style="display:none;"></div>
             </div>
 
             <div class="form-group">
-                <label for="destination">Ville de destination</label>
-                <input type="text" id="destination" placeholder="ex: Lyon" required>
-            </div>
-
-            <div class="form-group">
-                <label for="distance">Distance estimée (en km)</label>
-                <input type="number" id="distance" placeholder="ex: 460" min="1" required>
+                <label for="destination">Destination (adresse ou ville)</label>
+                <input type="text" id="destination" placeholder="ex: Lyon" autocomplete="off" required>
+                <div id="sug-destination" class="suggestions" style="display:none;"></div>
             </div>
 
             <div class="form-group">
@@ -157,13 +189,14 @@
                 </select>
             </div>
 
-            <button type="submit">Calculer le coût</button>
+            <button type="submit">Calculer le trajet</button>
+            <div id="loading" class="loading">Calcul de la distance par la route en cours...</div>
         </form>
 
         <div class="results" id="results">
             <div class="result-card">
                 <div class="result-row">
-                    <span>Distance :</span>
+                    <span>Distance (route) :</span>
                     <span id="res-distance">0 km</span>
                 </div>
                 <div class="result-row">
@@ -192,52 +225,114 @@
     </div>
 
     <script>
-        // Prix moyens indicatifs (en €/L ou €/kWh)
-        const PRIX_CARBURANT = {
-            e10: 1.85,
-            diesel: 1.75,
-            e85: 0.90,
-            elec: 0.25
-        };
-
-        // Estimation moyenne du coût de péage par km (~0.09€/km)
+        const PRIX_CARBURANT = { e10: 1.85, diesel: 1.75, e85: 0.90, elec: 0.25 };
         const COUT_PEAGE_PAR_KM = 0.09;
-
-        // Estimation moyenne du billet de train par km (~0.14€/km)
         const COUT_TRAIN_PAR_KM = 0.14;
 
-        document.getElementById('calc-form').addEventListener('submit', function(e) {
+        let coordDepart = null;
+        let coordDestination = null;
+
+        // Fonction d'autocomplétion (Nominatim - OpenStreetMap)
+        function setupAutocomplete(inputId, suggestionsId, onSelect) {
+            const input = document.getElementById(inputId);
+            const sugBox = document.getElementById(suggestionsId);
+            let timeout = null;
+
+            input.addEventListener('input', () => {
+                clearTimeout(timeout);
+                const query = input.value.trim();
+
+                if (query.length < 3) {
+                    sugBox.style.display = 'none';
+                    return;
+                }
+
+                timeout = setTimeout(() => {
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+                        .then(res => res.json())
+                        .then(data => {
+                            sugBox.innerHTML = '';
+                            if (data.length === 0) {
+                                sugBox.style.display = 'none';
+                                return;
+                            }
+                            data.forEach(place => {
+                                const div = document.createElement('div');
+                                div.className = 'suggestion-item';
+                                div.innerText = place.display_name;
+                                div.addEventListener('click', () => {
+                                    input.value = place.display_name;
+                                    sugBox.style.display = 'none';
+                                    onSelect({ lon: place.lon, lat: place.lat });
+                                });
+                                sugBox.appendChild(div);
+                            });
+                            sugBox.style.display = 'block';
+                        });
+                }, 300);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== input) sugBox.style.display = 'none';
+            });
+        }
+
+        setupAutocomplete('depart', 'sug-depart', coords => coordDepart = coords);
+        setupAutocomplete('destination', 'sug-destination', coords => coordDestination = coords);
+
+        document.getElementById('calc-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const distance = parseFloat(document.getElementById('distance').value);
-            const conso = parseFloat(document.getElementById('conso').value);
-            const typeCarburant = document.getElementById('carburant').value;
-
-            // Calculs
-            const prixUnitaire = PRIX_CARBURANT[typeCarburant];
-            const coutCarburant = (distance / 100) * conso * prixUnitaire;
-            const coutPeage = distance * COUT_PEAGE_PAR_KM;
-            const coutTotalVoiture = coutCarburant + coutPeage;
-
-            const coutTrain = distance * COUT_TRAIN_PAR_KM;
-
-            // Affichage des résultats
-            document.getElementById('res-distance').innerText = distance + ' km';
-            document.getElementById('res-carburant').innerText = coutCarburant.toFixed(2) + ' €';
-            document.getElementById('res-peage').innerText = coutPeage.toFixed(2) + ' €';
-            document.getElementById('res-total').innerText = coutTotalVoiture.toFixed(2) + ' €';
-            document.getElementById('res-train').innerText = coutTrain.toFixed(2) + ' €';
-
-            const bilanEl = document.getElementById('res-bilan');
-            if (coutTotalVoiture < coutTrain) {
-                const diff = (coutTrain - coutTotalVoiture).toFixed(2);
-                bilanEl.innerText = `La voiture est environ ${diff} € moins chère qu'un billet de train solo pour ce trajet.`;
-            } else {
-                const diff = (coutTotalVoiture - coutTrain).toFixed(2);
-                bilanEl.innerText = `Le train est environ ${diff} € moins cher qu'un trajet en voiture solo.`;
+            if (!coordDepart || !coordDestination) {
+                alert("Veuillez sélectionner le départ et la destination dans les propositions de la liste.");
+                return;
             }
 
-            document.getElementById('results').style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                // Calcul de la distance réelle par la route via OSRM
+                const url = `https://router.project-osrm.org/route/v1/driving/${coordDepart.lon},${coordDepart.lat};${coordDestination.lon},${coordDestination.lat}?overview=false`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.routes || data.routes.length === 0) {
+                    alert("Impossible de calculer l'itinéraire entre ces deux points.");
+                    return;
+                }
+
+                const distanceKm = Math.round(data.routes[0].distance / 1000);
+                const conso = parseFloat(document.getElementById('conso').value);
+                const typeCarburant = document.getElementById('carburant').value;
+
+                const prixUnitaire = PRIX_CARBURANT[typeCarburant];
+                const coutCarburant = (distanceKm / 100) * conso * prixUnitaire;
+                const coutPeage = distanceKm * COUT_PEAGE_PAR_KM;
+                const coutTotalVoiture = coutCarburant + coutPeage;
+                const coutTrain = distanceKm * COUT_TRAIN_PAR_KM;
+
+                document.getElementById('res-distance').innerText = distanceKm + ' km';
+                document.getElementById('res-carburant').innerText = coutCarburant.toFixed(2) + ' €';
+                document.getElementById('res-peage').innerText = coutPeage.toFixed(2) + ' €';
+                document.getElementById('res-total').innerText = coutTotalVoiture.toFixed(2) + ' €';
+                document.getElementById('res-train').innerText = coutTrain.toFixed(2) + ' €';
+
+                const bilanEl = document.getElementById('res-bilan');
+                if (coutTotalVoiture < coutTrain) {
+                    const diff = (coutTrain - coutTotalVoiture).toFixed(2);
+                    bilanEl.innerText = `La voiture est environ ${diff} € moins chère qu'un billet de train solo pour ce trajet.`;
+                } else {
+                    const diff = (coutTotalVoiture - coutTrain).toFixed(2);
+                    bilanEl.innerText = `Le train est environ ${diff} € moins cher qu'un trajet en voiture solo.`;
+                }
+
+                document.getElementById('results').style.display = 'block';
+            } catch (err) {
+                alert("Erreur lors de la récupération du trajet.");
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
         });
     </script>
 </body>

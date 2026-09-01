@@ -1,1042 +1,1283 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Calculateur de Trajet : Coût, Péages, CO2 & Comparaison</title>
-
-    <meta name="description" content="Calculez le coût de votre trajet en voiture : carburant, péages, distance et empreinte CO2. Comparez aussi les alternatives train, hôtel et location de voiture.">
-
-    <meta property="og:title" content="Calculateur de Trajet & Empreinte CO2">
-    <meta property="og:description" content="Calculez votre coût de trajet, les péages, le CO2 et découvrez des solutions pour votre voyage.">
-    <meta property="og:type" content="website">
-
-    <!-- Google Tag Manager -->
-    <script>
-    (function(w,d,s,l,i){
-        w[l]=w[l]||[];
-        w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
-        var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),
-        dl=l!='dataLayer'?'&l='+l:'';
-        j.async=true;
-        j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-        f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-K9999VVZ');
-    </script>
-
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary: #10b981;
-            --dark: #0f172a;
-            --light-bg: #f8fafc;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --text: #334155;
-            --text-light: #64748b;
-            --warning: #f59e0b;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--light-bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding-bottom: 60px;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
-            color: white;
-            padding: 2.5rem 1rem;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
-            color: white;
-        }
-
-        header p {
-            color: #94a3b8;
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .presets-bar {
-            margin: 1.5rem 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .presets-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-right: 0.5rem;
-        }
-
-        .chip {
-            background: white;
-            border: 1px solid var(--border);
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .chip:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background-color: #eff6ff;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (min-width: 850px) {
-            .main-grid {
-                grid-template-columns: 380px 1fr;
-            }
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-
-        .card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1.25rem;
-            color: var(--dark);
-        }
-
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: white;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .autocomplete-list {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid var(--border);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
-            max-height: 260px;
-            overflow-y: auto;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-        }
-
-        .autocomplete-list.active {
-            display: block;
-        }
-
-        .autocomplete-item {
-            padding: 0.7rem 0.75rem;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.88rem;
-        }
-
-        .autocomplete-item:hover {
-            background: #eff6ff;
-        }
-
-        .autocomplete-item strong {
-            display: block;
-            color: var(--dark);
-        }
-
-        .autocomplete-item small {
-            color: var(--text-light);
-        }
-
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 0.85rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .highway-option {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.9rem;
-        }
-
-        .highway-option input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .highway-option label {
-            margin: 0;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .highway-option strong {
-            color: var(--dark);
-        }
-
-        .highway-help {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-top: 0.3rem;
-            font-weight: normal;
-        }
-
-        .loading-prices {
-            font-size: 0.75rem;
-            color: var(--secondary);
-            margin-top: 0.25rem;
-        }
-
-        .status-message {
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            color: var(--text-light);
-        }
-
-        .results-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .metric-box {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .metric-value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .metric-label {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            text-transform: uppercase;
-        }
-
-        .toll-note {
-            font-size: 0.72rem;
-            color: var(--text-light);
-            margin-top: 0.4rem;
-        }
-
-        .co2-comparison {
-            margin-top: 1.5rem;
-        }
-
-        .co2-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px dashed var(--border);
-            gap: 1rem;
-        }
-
-        .co2-row > div:first-child {
-            flex: 1;
-        }
-
-        .co2-bar-container {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            margin-top: 4px;
-            overflow: hidden;
-        }
-
-        .co2-bar {
-            height: 100%;
-            border-radius: 4px;
-        }
-
-        .affiliate-box {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border: 1px solid #bfdbfe;
-            border-radius: 10px;
-            padding: 1.25rem;
-            margin-top: 1.5rem;
-        }
-
-        .affiliate-box.green {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            border-color: #a7f3d0;
-        }
-
-        .affiliate-box.orange {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-            border-color: #fed7aa;
-        }
-
-        .affiliate-box.amazon {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-            border-color: #fdba74;
-        }
-
-        .affiliate-box h3 {
-            font-size: 1.1rem;
-            color: var(--dark);
-            margin-bottom: 0.4rem;
-        }
-
-        .affiliate-box p {
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .affiliate-btn {
-            display: inline-block;
-            background-color: var(--secondary);
-            color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 0.35rem;
-        }
-
-        .affiliate-btn.blue {
-            background-color: var(--primary);
-        }
-
-        .affiliate-btn.orange-btn {
-            background-color: #ea580c;
-        }
-
-        .affiliate-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.7rem;
-        }
-
-        @media (min-width: 650px) {
-            .affiliate-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .affiliate-card {
-            background: rgba(255,255,255,0.75);
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 8px;
-            padding: 0.9rem;
-        }
-
-        .affiliate-card strong {
-            display: block;
-            margin-bottom: 0.25rem;
-            color: var(--dark);
-        }
-
-        .affiliate-card p {
-            margin-bottom: 0.5rem;
-        }
-
-        .share-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .share-btn {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .seo-content {
-            margin-top: 3rem;
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-
-        .seo-content h2 {
-            margin-bottom: 1rem;
-            color: var(--dark);
-        }
-
-        .seo-content h3 {
-            margin: 1.2rem 0 0.5rem 0;
-            color: var(--dark);
-        }
-
-        .seo-content ul {
-            padding-left: 1.3rem;
-        }
-
-        .faq-item {
-            margin-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.8rem;
-        }
-
-        .faq-question {
-            font-weight: 600;
-        }
-
-        .small-note {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            margin-top: 0.8rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Calculateur de Trajet : Coût, Péages, CO2 & Comparaison</title>
+
+<meta name="description" content="Calculez le coût de votre trajet en voiture : carburant, péages, distance et empreinte CO2. Comparez aussi les alternatives train, hôtel et location de voiture.">
+
+<meta property="og:title" content="Calculateur de Trajet & Empreinte CO2">
+<meta property="og:description" content="Calculez votre coût de trajet, les péages, le CO2 et découvrez des solutions pour votre voyage.">
+<meta property="og:type" content="website">
+
+<!-- Google Tag Manager -->
+<script>
+(function(w,d,s,l,i){
+    w[l]=w[l]||[];
+    w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+    var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),
+    dl=l!='dataLayer'?'&l='+l:'';
+    j.async=true;
+    j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+    f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-K9999VVZ');
+</script>
+
+<style>
+:root {
+    --primary:#2563eb;
+    --primary-hover:#1d4ed8;
+    --secondary:#10b981;
+    --dark:#0f172a;
+    --light-bg:#f8fafc;
+    --card-bg:#ffffff;
+    --border:#e2e8f0;
+    --text:#334155;
+    --text-light:#64748b;
+    --warning:#f59e0b;
+    --danger:#dc2626;
+}
+
+* {
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+body {
+    background-color:var(--light-bg);
+    color:var(--text);
+    line-height:1.6;
+    padding-bottom:60px;
+}
+
+header {
+    background:linear-gradient(135deg,var(--dark) 0%,#1e293b 100%);
+    color:white;
+    padding:2.5rem 1rem;
+    text-align:center;
+}
+
+header h1 {
+    font-size:2.2rem;
+    margin-bottom:.5rem;
+    color:white;
+}
+
+header p {
+    color:#94a3b8;
+    font-size:1.1rem;
+    max-width:700px;
+    margin:0 auto;
+}
+
+.container {
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 1rem;
+}
+
+.presets-bar {
+    margin:1.5rem 0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem;
+    align-items:center;
+}
+
+.presets-title {
+    font-weight:600;
+    font-size:.9rem;
+    color:var(--text-light);
+    margin-right:.5rem;
+}
+
+.chip {
+    background:white;
+    border:1px solid var(--border);
+    padding:.4rem .8rem;
+    border-radius:20px;
+    font-size:.85rem;
+    cursor:pointer;
+}
+
+.chip:hover {
+    border-color:var(--primary);
+    color:var(--primary);
+    background-color:#eff6ff;
+}
+
+.main-grid {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:1.5rem;
+}
+
+@media (min-width:850px) {
+    .main-grid {
+        grid-template-columns:380px 1fr;
+    }
+}
+
+.card {
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:1.5rem;
+    box-shadow:0 4px 6px -1px rgba(0,0,0,.05);
+}
+
+.card h2 {
+    font-size:1.25rem;
+    margin-bottom:1.25rem;
+    color:var(--dark);
+}
+
+.form-group {
+    margin-bottom:1.2rem;
+}
+
+.form-group label {
+    display:block;
+    font-size:.875rem;
+    font-weight:600;
+    margin-bottom:.4rem;
+}
+
+.form-control {
+    width:100%;
+    padding:.75rem;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:.95rem;
+    background:white;
+}
+
+.form-control:focus {
+    outline:none;
+    border-color:var(--primary);
+}
+
+.input-wrapper {
+    position:relative;
+}
+
+.autocomplete-list {
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    background:white;
+    border:1px solid var(--border);
+    border-top:none;
+    border-radius:0 0 8px 8px;
+    max-height:260px;
+    overflow-y:auto;
+    display:none;
+    z-index:1000;
+    box-shadow:0 4px 10px rgba(0,0,0,.12);
+}
+
+.autocomplete-list.active {
+    display:block;
+}
+
+.autocomplete-item {
+    padding:.7rem .75rem;
+    cursor:pointer;
+    border-bottom:1px solid var(--border);
+    font-size:.88rem;
+}
+
+.autocomplete-item:hover {
+    background:#eff6ff;
+}
+
+.autocomplete-item strong {
+    display:block;
+    color:var(--dark);
+}
+
+.autocomplete-item small {
+    color:var(--text-light);
+}
+
+.btn {
+    display:inline-block;
+    width:100%;
+    padding:.85rem;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    font-size:1rem;
+    cursor:pointer;
+    text-align:center;
+}
+
+.btn-primary {
+    background-color:var(--primary);
+    color:white;
+}
+
+.btn-primary:hover {
+    background-color:var(--primary-hover);
+}
+
+.highway-option {
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:.9rem;
+}
+
+.highway-option input {
+    width:20px;
+    height:20px;
+    cursor:pointer;
+}
+
+.highway-option label {
+    margin:0;
+    cursor:pointer;
+    flex:1;
+}
+
+.highway-option strong {
+    color:var(--dark);
+}
+
+.highway-help {
+    font-size:.75rem;
+    color:var(--text-light);
+    margin-top:.3rem;
+}
+
+.loading-prices {
+    font-size:.75rem;
+    color:var(--secondary);
+    margin-top:.25rem;
+}
+
+.status-message {
+    font-size:.8rem;
+    margin-top:.5rem;
+    color:var(--text-light);
+}
+
+.results-summary {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:1rem;
+    margin-bottom:1.5rem;
+}
+
+.metric-box {
+    background:#f8fafc;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:1rem;
+    text-align:center;
+}
+
+.metric-value {
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--dark);
+}
+
+.metric-label {
+    font-size:.8rem;
+    color:var(--text-light);
+    text-transform:uppercase;
+}
+
+.toll-note {
+    font-size:.72rem;
+    color:var(--text-light);
+    margin-top:.4rem;
+}
+
+.error-box {
+    display:none;
+    margin-bottom:1.5rem;
+    padding:1rem;
+    border-radius:8px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+}
+
+.error-box.active {
+    display:block;
+}
+
+.error-box strong {
+    display:block;
+    margin-bottom:.3rem;
+}
+
+.error-code {
+    font-family:monospace;
+    font-size:.78rem;
+    margin-top:.5rem;
+    word-break:break-word;
+}
+
+.success-box {
+    display:none;
+    margin-bottom:1.5rem;
+    padding:.8rem 1rem;
+    border-radius:8px;
+    background:#ecfdf5;
+    border:1px solid #a7f3d0;
+    color:#065f46;
+}
+
+.success-box.active {
+    display:block;
+}
+
+.co2-comparison {
+    margin-top:1.5rem;
+}
+
+.co2-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:.75rem 0;
+    border-bottom:1px dashed var(--border);
+    gap:1rem;
+}
+
+.co2-row > div:first-child {
+    flex:1;
+}
+
+.co2-bar-container {
+    width:100%;
+    height:8px;
+    background:#e2e8f0;
+    border-radius:4px;
+    margin-top:4px;
+    overflow:hidden;
+}
+
+.co2-bar {
+    height:100%;
+    border-radius:4px;
+}
+
+.affiliate-box {
+    background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);
+    border:1px solid #bfdbfe;
+    border-radius:10px;
+    padding:1.25rem;
+    margin-top:1.5rem;
+}
+
+.affiliate-box.green {
+    background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);
+    border-color:#a7f3d0;
+}
+
+.affiliate-box.orange {
+    background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);
+    border-color:#fed7aa;
+}
+
+.affiliate-box.amazon {
+    background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);
+    border-color:#fdba74;
+}
+
+.affiliate-box h3 {
+    font-size:1.1rem;
+    color:var(--dark);
+    margin-bottom:.4rem;
+}
+
+.affiliate-box p {
+    font-size:.9rem;
+    margin-bottom:1rem;
+}
+
+.affiliate-btn {
+    display:inline-block;
+    background-color:var(--secondary);
+    color:white;
+    padding:.6rem 1.2rem;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:600;
+    font-size:.9rem;
+    margin-top:.35rem;
+}
+
+.affiliate-btn.blue {
+    background-color:var(--primary);
+}
+
+.affiliate-btn.orange-btn {
+    background-color:#ea580c;
+}
+
+.affiliate-grid {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:.7rem;
+}
+
+@media (min-width:650px) {
+    .affiliate-grid {
+        grid-template-columns:1fr 1fr;
+    }
+}
+
+.affiliate-card {
+    background:rgba(255,255,255,.75);
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:8px;
+    padding:.9rem;
+}
+
+.affiliate-card strong {
+    display:block;
+    margin-bottom:.25rem;
+    color:var(--dark);
+}
+
+.affiliate-card p {
+    margin-bottom:.5rem;
+}
+
+.share-buttons {
+    display:flex;
+    gap:.5rem;
+    margin-top:1rem;
+}
+
+.share-btn {
+    flex:1;
+    padding:.5rem;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:white;
+    cursor:pointer;
+    font-size:.85rem;
+}
+
+.seo-content {
+    margin-top:3rem;
+    background:white;
+    padding:2rem;
+    border-radius:12px;
+    border:1px solid var(--border);
+}
+
+.seo-content h2 {
+    margin-bottom:1rem;
+    color:var(--dark);
+}
+
+.seo-content h3 {
+    margin:1.2rem 0 .5rem 0;
+    color:var(--dark);
+}
+
+.seo-content ul {
+    padding-left:1.3rem;
+}
+
+.faq-item {
+    margin-bottom:1rem;
+    border-bottom:1px solid var(--border);
+    padding-bottom:.8rem;
+}
+
+.faq-question {
+    font-weight:600;
+}
+
+.small-note {
+    font-size:.75rem;
+    color:var(--text-light);
+    margin-top:.8rem;
+}
+</style>
 </head>
 
 <body>
 
 <noscript>
-    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K9999VVZ"
-    height="0"
-    width="0"
-    style="display:none;visibility:hidden"></iframe>
+<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K9999VVZ"
+height="0"
+width="0"
+style="display:none;visibility:hidden"></iframe>
 </noscript>
 
 <header>
-    <div class="container">
-        <h1>Calculateur de Trajet & Empreinte CO2</h1>
-        <p>
-            Calculez automatiquement votre distance, votre coût de carburant,
-            les péages estimés et l'empreinte carbone de votre trajet.
-        </p>
-    </div>
+<div class="container">
+
+<h1>Calculateur de Trajet & Empreinte CO2</h1>
+
+<p>
+Calculez automatiquement votre distance, votre coût de carburant,
+les péages estimés et l'empreinte carbone de votre trajet.
+</p>
+
+</div>
 </header>
 
 <main class="container">
 
-    <div class="presets-bar">
-        <span class="presets-title">Trajets populaires :</span>
+<div class="presets-bar">
 
-        <button class="chip" onclick="setPreset('Paris, France','Lyon, France')">
-            Paris ➔ Lyon
-        </button>
+<span class="presets-title">
+Trajets populaires :
+</span>
 
-        <button class="chip" onclick="setPreset('Marseille, France','Nice, France')">
-            Marseille ➔ Nice
-        </button>
+<button class="chip"
+onclick="setPreset('Paris, France','Lyon, France')">
+Paris ➔ Lyon
+</button>
 
-        <button class="chip" onclick="setPreset('Toulouse, France','Bordeaux, France')">
-            Toulouse ➔ Bordeaux
-        </button>
+<button class="chip"
+onclick="setPreset('Marseille, France','Nice, France')">
+Marseille ➔ Nice
+</button>
 
-        <button class="chip" onclick="setPreset('Paris, France','Nantes, France')">
-            Paris ➔ Nantes
-        </button>
+<button class="chip"
+onclick="setPreset('Toulouse, France','Bordeaux, France')">
+Toulouse ➔ Bordeaux
+</button>
 
-        <button class="chip" onclick="setPreset('Lille, France','Paris, France')">
-            Lille ➔ Paris
-        </button>
-    </div>
+<button class="chip"
+onclick="setPreset('Paris, France','Nantes, France')">
+Paris ➔ Nantes
+</button>
 
-    <div class="main-grid">
+<button class="chip"
+onclick="setPreset('Lille, France','Paris, France')">
+Lille ➔ Paris
+</button>
 
-        <!-- FORMULAIRE -->
-        <section class="card">
+</div>
 
-            <h2>🚗 Votre Itinéraire</h2>
+<div class="main-grid">
 
-            <form id="routeForm">
+<!-- FORMULAIRE -->
 
-                <div class="form-group">
-                    <label for="dep">Adresse de départ</label>
+<section class="card">
 
-                    <div class="input-wrapper">
-                        <input
-                            type="text"
-                            id="dep"
-                            class="form-control"
-                            placeholder="Ex : 10 rue de Rivoli, Paris"
-                            required
-                            autocomplete="off">
+<h2>🚗 Votre Itinéraire</h2>
 
-                        <div class="autocomplete-list" id="depList"></div>
-                    </div>
-                </div>
+<form id="routeForm">
 
-                <div class="form-group">
-                    <label for="arr">Adresse d'arrivée</label>
+<div class="form-group">
 
-                    <div class="input-wrapper">
-                        <input
-                            type="text"
-                            id="arr"
-                            class="form-control"
-                            placeholder="Ex : 20 rue de la République, Lyon"
-                            required
-                            autocomplete="off">
+<label for="dep">
+Adresse de départ
+</label>
 
-                        <div class="autocomplete-list" id="arrList"></div>
-                    </div>
-                </div>
+<div class="input-wrapper">
 
-                <!-- AUTOROUTE -->
-                <div class="form-group">
+<input
+type="text"
+id="dep"
+class="form-control"
+placeholder="Ex : 10 rue de Rivoli, Paris"
+required
+autocomplete="off">
 
-                    <div class="highway-option">
+<div
+class="autocomplete-list"
+id="depList">
+</div>
 
-                        <input
-                            type="checkbox"
-                            id="highway"
-                            checked>
+</div>
 
-                        <label for="highway">
+</div>
 
-                            <strong>🛣️ Avec autoroute</strong>
 
-                            <div class="highway-help">
-                                Autorise les autoroutes et routes à péage.
-                                Si décoché, TomTom tente de les éviter.
-                            </div>
+<div class="form-group">
 
-                        </label>
+<label for="arr">
+Adresse d'arrivée
+</label>
 
-                    </div>
+<div class="input-wrapper">
 
-                </div>
+<input
+type="text"
+id="arr"
+class="form-control"
+placeholder="Ex : 20 rue de la République, Lyon"
+required
+autocomplete="off">
 
-                <!-- MOTORISATION -->
-                <div class="form-group">
+<div
+class="autocomplete-list"
+id="arrList">
+</div>
 
-                    <label for="motor">Motorisation</label>
+</div>
 
-                    <select id="motor" class="form-control">
+</div>
 
-                        <option value="essence">
-                            Essence — 7,0 L / 100 km
-                        </option>
 
-                        <option value="diesel">
-                            Diesel — 5,8 L / 100 km
-                        </option>
+<div class="form-group">
 
-                        <option value="elec">
-                            Électrique — 18 kWh / 100 km
-                        </option>
+<div class="highway-option">
 
-                    </select>
+<input
+type="checkbox"
+id="highway"
+checked>
 
-                </div>
+<label for="highway">
 
-                <!-- PRIX -->
-                <div class="form-group">
+<strong>🛣️ Avec autoroute</strong>
 
-                    <label for="fuelPrice">
-                        Prix carburant / électricité
-                    </label>
+<div class="highway-help">
+Autorise les autoroutes et routes à péage.
+Si décoché, TomTom tente de les éviter.
+</div>
 
-                    <input
-                        type="number"
-                        step="0.01"
-                        id="fuelPrice"
-                        class="form-control"
-                        value="2.06">
+</label>
 
-                    <div class="loading-prices">
-                        Prix utilisé pour le calcul
-                    </div>
+</div>
 
-                </div>
+</div>
 
-                <button type="submit" class="btn btn-primary">
-                    Calculer le trajet
-                </button>
 
-                <div id="routeStatus" class="status-message"></div>
+<div class="form-group">
 
-            </form>
+<label for="motor">
+Motorisation
+</label>
 
-        </section>
+<select id="motor" class="form-control">
 
-        <!-- RESULTATS -->
-        <section class="card">
+<option value="essence">
+Essence — 7,0 L / 100 km
+</option>
 
-            <h2>
-                📊 Récapitulatif
+<option value="diesel">
+Diesel — 5,8 L / 100 km
+</option>
 
-                <span
-                    id="routeTitle"
-                    style="font-size:0.9rem;font-weight:normal;color:var(--text-light);">
-                    (Départ ➔ Arrivée)
-                </span>
-            </h2>
+<option value="elec">
+Électrique — 18 kWh / 100 km
+</option>
 
-            <div class="results-summary">
+</select>
 
-                <div class="metric-box">
-                    <div class="metric-value" id="resTotalCost">—</div>
-                    <div class="metric-label">Coût total</div>
-                </div>
+</div>
 
-                <div class="metric-box">
-                    <div class="metric-value" id="resFuelCost">—</div>
-                    <div class="metric-label">Carburant</div>
-                </div>
 
-                <div class="metric-box">
-                    <div class="metric-value" id="resToll">—</div>
-                    <div class="metric-label">Péage estimé</div>
-                    <div class="toll-note">
-                        Estimation indicative
-                    </div>
-                </div>
+<div class="form-group">
 
-                <div class="metric-box">
-                    <div class="metric-value" id="resCO2">—</div>
-                    <div class="metric-label">CO2</div>
-                </div>
+<label for="fuelPrice">
+Prix carburant / électricité
+</label>
 
-                <div class="metric-box">
-                    <div class="metric-value" id="resDistance">—</div>
-                    <div class="metric-label">Distance</div>
-                </div>
+<input
+type="number"
+step="0.01"
+id="fuelPrice"
+class="form-control"
+value="2.06">
 
-            </div>
+<div class="loading-prices">
+Prix utilisé pour le calcul
+</div>
 
-            <!-- CO2 -->
-            <h3>🌱 Comparatif Empreinte CO2</h3>
+</div>
 
-            <div class="co2-comparison">
 
-                <div class="co2-row">
+<button
+type="submit"
+class="btn btn-primary">
 
-                    <div>
-                        <strong>Voiture Thermique</strong>
+Calculer le trajet
 
-                        <div class="co2-bar-container">
-                            <div
-                                id="barThermique"
-                                class="co2-bar"
-                                style="width:100%;background:#ef4444;">
-                            </div>
-                        </div>
-                    </div>
+</button>
 
-                    <span id="valThermique">—</span>
+<div
+id="routeStatus"
+class="status-message">
+</div>
 
-                </div>
+</form>
 
-                <div class="co2-row">
+</section>
 
-                    <div>
-                        <strong>Voiture Électrique</strong>
 
-                        <div class="co2-bar-container">
-                            <div
-                                id="barElec"
-                                class="co2-bar"
-                                style="width:20%;background:#f59e0b;">
-                            </div>
-                        </div>
-                    </div>
+<!-- RESULTATS -->
 
-                    <span id="valElec">—</span>
+<section class="card">
 
-                </div>
+<h2>
 
-                <div class="co2-row">
+📊 Récapitulatif
 
-                    <div>
-                        <strong>Train / TGV</strong>
+<span
+id="routeTitle"
+style="font-size:.9rem;font-weight:normal;color:var(--text-light);">
 
-                        <div class="co2-bar-container">
-                            <div
-                                id="barTrain"
-                                class="co2-bar"
-                                style="width:4%;background:#10b981;">
-                            </div>
-                        </div>
-                    </div>
+(Départ ➔ Arrivée)
 
-                    <span id="valTrain">—</span>
+</span>
 
-                </div>
+</h2>
 
-            </div>
 
-            <!-- PARTAGE -->
-            <div style="margin-top:1.5rem;">
+<!-- ERREUR TOMTOM -->
 
-                <label style="font-size:0.85rem;font-weight:600;">
-                    Partager ce résultat :
-                </label>
+<div
+id="tomtomError"
+class="error-box">
 
-                <div class="share-buttons">
+<strong>❌ Erreur TomTom</strong>
 
-                    <button class="share-btn" onclick="copySummary()">
-                        📋 Copier le résumé
-                    </button>
+<div id="tomtomErrorMessage"></div>
 
-                    <button class="share-btn" onclick="shareURL()">
-                        🔗 Lien direct
-                    </button>
+<div
+id="tomtomErrorCode"
+class="error-code">
+</div>
 
-                </div>
+</div>
 
-            </div>
 
-            <!-- SNCF -->
-            <div class="affiliate-box">
+<!-- SUCCÈS -->
 
-                <h3>🚆 Trouver un train vers votre destination</h3>
+<div
+id="routeSuccess"
+class="success-box">
 
-                <p>
-                    Recherchez directement des trajets en train
-                    vers la ville d'arrivée de votre voyage.
-                </p>
+✓ Itinéraire calculé avec succès.
 
-                <a
-                    id="sncfLink"
-                    href="https://www.sncf-connect.com/"
-                    target="_blank"
-                    rel="nofollow sponsored noopener"
-                    class="affiliate-btn blue">
+</div>
 
-                    Rechercher un train ➔
 
-                </a>
+<div class="results-summary">
 
-            </div>
+<div class="metric-box">
 
-            <!-- HOTEL -->
-            <div class="affiliate-box green">
+<div
+class="metric-value"
+id="resTotalCost">
+—
+</div>
 
-                <h3>🏨 Trouver un hôtel</h3>
+<div class="metric-label">
+Coût total
+</div>
 
-                <p>
-                    Vous restez sur place ?
-                    Recherchez les hôtels disponibles
-                    dans votre ville d'arrivée.
-                </p>
+</div>
 
-                <a
-                    id="hotelLink"
-                    href="https://www.booking.com/"
-                    target="_blank"
-                    rel="nofollow sponsored noopener"
-                    class="affiliate-btn">
 
-                    Rechercher un hôtel ➔
+<div class="metric-box">
 
-                </a>
+<div
+class="metric-value"
+id="resFuelCost">
+—
+</div>
 
-            </div>
+<div class="metric-label">
+Carburant
+</div>
 
-            <!-- LOCATION -->
-            <div class="affiliate-box orange">
+</div>
 
-                <h3>🚘 Louer une voiture</h3>
 
-                <p>
-                    Besoin d'une voiture à destination ?
-                    Comparez les offres de location
-                    autour de votre ville d'arrivée.
-                </p>
+<div class="metric-box">
 
-                <a
-                    id="carLink"
-                    href="https://www.rentalcars.com/"
-                    target="_blank"
-                    rel="nofollow sponsored noopener"
-                    class="affiliate-btn orange-btn">
+<div
+class="metric-value"
+id="resToll">
+—
+</div>
 
-                    Rechercher une voiture ➔
+<div class="metric-label">
+Péage estimé
+</div>
 
-                </a>
+<div class="toll-note">
+Estimation indicative
+</div>
 
-            </div>
+</div>
 
-            <!-- AMAZON -->
-            <div class="affiliate-box amazon">
 
-                <h3>🛒 Bien préparer son voyage</h3>
+<div class="metric-box">
 
-                <p>
-                    Quelques équipements utiles peuvent rendre
-                    votre trajet plus confortable.
-                </p>
+<div
+class="metric-value"
+id="resCO2">
+—
+</div>
 
-                <div class="affiliate-grid">
+<div class="metric-label">
+CO2
+</div>
 
-                    <div class="affiliate-card">
+</div>
 
-                        <strong>🚆 Voyage en train</strong>
 
-                        <p>
-                            Accessoires pratiques pour voyager
-                            confortablement en train.
-                        </p>
+<div class="metric-box">
 
-                        <a
-                            id="amazonTrain"
-                            target="_blank"
-                            rel="nofollow sponsored noopener"
-                            class="affiliate-btn orange-btn">
+<div
+class="metric-value"
+id="resDistance">
+—
+</div>
 
-                            Voir les produits ➔
+<div class="metric-label">
+Distance
+</div>
 
-                        </a>
+</div>
 
-                    </div>
+</div>
 
-                    <div class="affiliate-card">
 
-                        <strong>🚗 Petit trajet</strong>
+<h3>🌱 Comparatif Empreinte CO2</h3>
 
-                        <p>
-                            Accessoires pour les trajets courts
-                            en voiture.
-                        </p>
+<div class="co2-comparison">
 
-                        <a
-                            id="amazonShort"
-                            target="_blank"
-                            rel="nofollow sponsored noopener"
-                            class="affiliate-btn orange-btn">
+<div class="co2-row">
 
-                            Voir les produits ➔
+<div>
 
-                        </a>
+<strong>
+Voiture Thermique
+</strong>
 
-                    </div>
+<div class="co2-bar-container">
 
-                    <div class="affiliate-card">
+<div
+id="barThermique"
+class="co2-bar"
+style="width:100%;background:#ef4444;">
+</div>
 
-                        <strong>🛣️ Trajet moyen</strong>
+</div>
 
-                        <p>
-                            Équipements utiles pour les trajets
-                            de plusieurs heures.
-                        </p>
+</div>
 
-                        <a
-                            id="amazonMedium"
-                            target="_blank"
-                            rel="nofollow sponsored noopener"
-                            class="affiliate-btn orange-btn">
+<span id="valThermique">
+—
+</span>
 
-                            Voir les produits ➔
+</div>
 
-                        </a>
 
-                    </div>
+<div class="co2-row">
 
-                    <div class="affiliate-card">
+<div>
 
-                        <strong>🧳 Long trajet</strong>
+<strong>
+Voiture Électrique
+</strong>
 
-                        <p>
-                            Accessoires pour rendre les longs
-                            trajets plus confortables.
-                        </p>
+<div class="co2-bar-container">
 
-                        <a
-                            id="amazonLong"
-                            target="_blank"
-                            rel="nofollow sponsored noopener"
-                            class="affiliate-btn orange-btn">
+<div
+id="barElec"
+class="co2-bar"
+style="width:20%;background:#f59e0b;">
+</div>
 
-                            Voir les produits ➔
+</div>
 
-                        </a>
+</div>
 
-                    </div>
+<span id="valElec">
+—
+</span>
 
-                </div>
+</div>
 
-                <div class="small-note">
-                    Les liens Amazon sont des liens affiliés.
-                    Si un achat est effectué après avoir suivi un lien,
-                    une commission peut être versée selon les conditions
-                    du programme partenaire.
-                </div>
 
-            </div>
+<div class="co2-row">
 
-        </section>
+<div>
 
-    </div>
+<strong>
+Train / TGV
+</strong>
 
-    <!-- SEO -->
-    <article class="seo-content">
+<div class="co2-bar-container">
 
-        <h2>
-            Comment calculer le coût réel d'un trajet ?
-        </h2>
+<div
+id="barTrain"
+class="co2-bar"
+style="width:4%;background:#10b981;">
+</div>
 
-        <p>
-            Le coût d'un trajet en voiture ne se limite pas au carburant.
-            Selon l'itinéraire choisi, il peut également inclure les péages,
-            tandis que la distance parcourue influence directement la
-            consommation et les émissions de CO2.
-        </p>
+</div>
 
-        <h3>🚗 Calcul du coût du carburant</h3>
+</div>
 
-        <p>
-            Le calculateur utilise la distance de l'itinéraire,
-            la consommation moyenne du véhicule et le prix du carburant
-            ou de l'électricité.
-        </p>
+<span id="valTrain">
+—
+</span>
 
-        <h3>🛣️ Avec ou sans autoroute</h3>
+</div>
 
-        <p>
-            Lorsque l'option « Avec autoroute » est désactivée,
-            le calculateur demande à TomTom d'éviter les routes à péage
-            et les autoroutes lorsque cela est possible.
-        </p>
+</div>
 
-        <h3>🌱 Comparer l'empreinte carbone</h3>
 
-        <p>
-            Le calculateur permet également de comparer l'impact estimé
-            d'un trajet en voiture thermique, en voiture électrique
-            et en train.
-        </p>
+<!-- PARTAGE -->
 
-        <h3>❓ Foire Aux Questions</h3>
+<div style="margin-top:1.5rem;">
 
-        <div class="faq-item">
-            <div class="faq-question">
-                La distance est-elle saisie manuellement ?
-            </div>
+<label style="font-size:.85rem;font-weight:600;">
+Partager ce résultat :
+</label>
 
-            <div>
-                Non. La distance est calculée automatiquement à partir
-                des deux adresses sélectionnées.
-            </div>
-        </div>
+<div class="share-buttons">
 
-        <div class="faq-item">
-            <div class="faq-question">
-                Le péage affiché est-il le prix exact ?
-            </div>
+<button
+class="share-btn"
+onclick="copySummary()">
+📋 Copier le résumé
+</button>
 
-            <div>
-                Non. Le montant affiché est une estimation indicative.
-                Le prix réel peut varier selon l'itinéraire, la classe
-                du véhicule et les conditions tarifaires des sociétés
-                autoroutières.
-            </div>
-        </div>
+<button
+class="share-btn"
+onclick="shareURL()">
+🔗 Lien direct
+</button>
 
-        <div class="faq-item">
-            <div class="faq-question">
-                Pourquoi utiliser TomTom ?
-            </div>
+</div>
 
-            <div>
-                TomTom permet de rechercher précisément des adresses
-                et de calculer des itinéraires routiers.
-            </div>
-        </div>
+</div>
 
-    </article>
+
+<!-- SNCF -->
+
+<div class="affiliate-box">
+
+<h3>
+🚆 Trouver un train vers votre destination
+</h3>
+
+<p>
+Recherchez directement des trajets en train
+vers la ville d'arrivée de votre voyage.
+</p>
+
+<a
+id="sncfLink"
+href="https://www.sncf-connect.com/"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn blue">
+
+Rechercher un train ➔
+
+</a>
+
+</div>
+
+
+<!-- HOTEL -->
+
+<div class="affiliate-box green">
+
+<h3>
+🏨 Trouver un hôtel
+</h3>
+
+<p>
+Vous restez sur place ?
+Recherchez les hôtels disponibles
+dans votre ville d'arrivée.
+</p>
+
+<a
+id="hotelLink"
+href="https://www.booking.com/"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn">
+
+Rechercher un hôtel ➔
+
+</a>
+
+</div>
+
+
+<!-- LOCATION -->
+
+<div class="affiliate-box orange">
+
+<h3>
+🚘 Louer une voiture
+</h3>
+
+<p>
+Besoin d'une voiture à destination ?
+Comparez les offres de location
+autour de votre ville d'arrivée.
+</p>
+
+<a
+id="carLink"
+href="https://www.rentalcars.com/"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn orange-btn">
+
+Rechercher une voiture ➔
+
+</a>
+
+</div>
+
+
+<!-- AMAZON -->
+
+<div class="affiliate-box amazon">
+
+<h3>
+🛒 Bien préparer son voyage
+</h3>
+
+<p>
+Quelques équipements utiles peuvent rendre
+votre trajet plus confortable.
+</p>
+
+<div class="affiliate-grid">
+
+<div class="affiliate-card">
+
+<strong>
+🚆 Voyage en train
+</strong>
+
+<p>
+Accessoires pratiques pour voyager
+confortablement en train.
+</p>
+
+<a
+id="amazonTrain"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn orange-btn">
+
+Voir les produits ➔
+
+</a>
+
+</div>
+
+
+<div class="affiliate-card">
+
+<strong>
+🚗 Petit trajet
+</strong>
+
+<p>
+Accessoires pour les trajets courts
+en voiture.
+</p>
+
+<a
+id="amazonShort"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn orange-btn">
+
+Voir les produits ➔
+
+</a>
+
+</div>
+
+
+<div class="affiliate-card">
+
+<strong>
+🛣️ Trajet moyen
+</strong>
+
+<p>
+Équipements utiles pour les trajets
+de plusieurs heures.
+</p>
+
+<a
+id="amazonMedium"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn orange-btn">
+
+Voir les produits ➔
+
+</a>
+
+</div>
+
+
+<div class="affiliate-card">
+
+<strong>
+🧳 Long trajet
+</strong>
+
+<p>
+Accessoires pour rendre les longs
+trajets plus confortables.
+</p>
+
+<a
+id="amazonLong"
+target="_blank"
+rel="nofollow sponsored noopener"
+class="affiliate-btn orange-btn">
+
+Voir les produits ➔
+
+</a>
+
+</div>
+
+</div>
+
+<div class="small-note">
+
+Les liens Amazon sont des liens affiliés.
+Si un achat est effectué après avoir suivi un lien,
+une commission peut être versée selon les conditions
+du programme partenaire.
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+
+<!-- SEO -->
+
+<article class="seo-content">
+
+<h2>
+Comment calculer le coût réel d'un trajet ?
+</h2>
+
+<p>
+Le coût d'un trajet en voiture ne se limite pas au carburant.
+Selon l'itinéraire choisi, il peut également inclure les péages,
+tandis que la distance parcourue influence directement la
+consommation et les émissions de CO2.
+</p>
+
+<h3>
+🚗 Calcul du coût du carburant
+</h3>
+
+<p>
+Le calculateur utilise la distance de l'itinéraire,
+la consommation moyenne du véhicule et le prix du carburant
+ou de l'électricité.
+</p>
+
+<h3>
+🛣️ Avec ou sans autoroute
+</h3>
+
+<p>
+Lorsque l'option « Avec autoroute » est désactivée,
+le calculateur demande à TomTom d'éviter les routes à péage
+et les autoroutes lorsque cela est possible.
+</p>
+
+<h3>
+🌱 Comparer l'empreinte carbone
+</h3>
+
+<p>
+Le calculateur permet également de comparer l'impact estimé
+d'un trajet en voiture thermique, en voiture électrique
+et en train.
+</p>
+
+<h3>
+❓ Foire Aux Questions
+</h3>
+
+<div class="faq-item">
+
+<div class="faq-question">
+La distance est-elle saisie manuellement ?
+</div>
+
+<div>
+Non. La distance est calculée automatiquement à partir
+des deux adresses sélectionnées.
+</div>
+
+</div>
+
+<div class="faq-item">
+
+<div class="faq-question">
+Le péage affiché est-il le prix exact ?
+</div>
+
+<div>
+Non. Le montant affiché est une estimation indicative.
+Le prix réel peut varier selon l'itinéraire, la classe
+du véhicule et les conditions tarifaires.
+</div>
+
+</div>
+
+<div class="faq-item">
+
+<div class="faq-question">
+Pourquoi utiliser TomTom ?
+</div>
+
+<div>
+TomTom permet de rechercher précisément des adresses
+et de calculer des itinéraires routiers.
+</div>
+
+</div>
+
+</article>
 
 </main>
+
 
 <script>
 
 /* =========================================================
    🔑 CLÉ TOMTOM
-   Mets ta NOUVELLE clé TomTom uniquement ici.
    ========================================================= */
 
-const TOMTOM_API_KEY = "f4RhrCbDX3Pi0Km31MBHm7HoZIVyKnsL";
+const TOMTOM_API_KEY = "COLLE_TA_CLE_ICI";
 
 
 /* =========================================================
@@ -1051,9 +1292,9 @@ const AMAZON_TAG = "cupgour-21";
    ========================================================= */
 
 const fuelPrices = {
-    essence: 2.06,
-    diesel: 2.23,
-    elec: 0.26
+    essence:2.06,
+    diesel:2.23,
+    elec:0.26
 };
 
 
@@ -1062,31 +1303,79 @@ const fuelPrices = {
    ========================================================= */
 
 let routeData = {
-    dep: null,
-    arr: null,
-    distance: 0,
-    duration: 0,
-    toll: 0,
-    motorway: true
+
+    dep:null,
+    arr:null,
+    distance:0,
+    duration:0,
+    toll:0,
+    motorway:true
+
 };
 
 
 /* =========================================================
-   OUTILS CLÉ
+   AFFICHAGE ERREUR
    ========================================================= */
 
-function hasTomTomKey() {
+function showTomTomError(message, code="") {
 
-    return (
-        TOMTOM_API_KEY &&
-        TOMTOM_API_KEY !== "COLLE_TA_NOUVELLE_CLE_ICI"
-    );
+    const errorBox =
+        document.getElementById("tomtomError");
+
+    const errorMessage =
+        document.getElementById("tomtomErrorMessage");
+
+    const errorCode =
+        document.getElementById("tomtomErrorCode");
+
+    errorMessage.innerText = message;
+
+    if(code) {
+        errorCode.innerText = "Code / détail : " + code;
+    } else {
+        errorCode.innerText = "";
+    }
+
+    errorBox.classList.add("active");
+
+    document
+        .getElementById("routeSuccess")
+        .classList.remove("active");
+
+}
+
+
+function hideTomTomError() {
+
+    document
+        .getElementById("tomtomError")
+        .classList.remove("active");
+
+    document
+        .getElementById("tomtomErrorMessage")
+        .innerText = "";
+
+    document
+        .getElementById("tomtomErrorCode")
+        .innerText = "";
+
+}
+
+
+function showRouteSuccess() {
+
+    hideTomTomError();
+
+    document
+        .getElementById("routeSuccess")
+        .classList.add("active");
 
 }
 
 
 /* =========================================================
-   PRIX AUTOMATIQUE
+   PRIX
    ========================================================= */
 
 function updateFuelPrice() {
@@ -1100,18 +1389,23 @@ function updateFuelPrice() {
     document.getElementById("fuelPrice").value =
         price.toFixed(2);
 
-    if (routeData.distance > 0) {
+    if(routeData.distance > 0) {
         calculateResults();
     }
 
 }
 
 
+document
+    .getElementById("motor")
+    .addEventListener("change", updateFuelPrice);
+
+
 /* =========================================================
    AUTOCOMPLÉTION
    ========================================================= */
 
-function setupAddressAutocomplete(inputId, listId) {
+function setupAddressAutocomplete(inputId,listId) {
 
     const input =
         document.getElementById(inputId);
@@ -1121,7 +1415,7 @@ function setupAddressAutocomplete(inputId, listId) {
 
     let timeout = null;
 
-    input.addEventListener("input", function() {
+    input.addEventListener("input",function() {
 
         clearTimeout(timeout);
 
@@ -1134,7 +1428,7 @@ function setupAddressAutocomplete(inputId, listId) {
         delete input.dataset.lon;
         delete input.dataset.city;
 
-        if (query.length < 3) {
+        if(query.length < 3) {
 
             list.classList.remove("active");
 
@@ -1146,21 +1440,27 @@ function setupAddressAutocomplete(inputId, listId) {
 
             try {
 
-                if (!hasTomTomKey()) {
+                if(
+                    !TOMTOM_API_KEY ||
+                    TOMTOM_API_KEY === "COLLE_TA_CLE_ICI"
+                ) {
 
                     list.innerHTML = `
-                        <div class="autocomplete-item">
-                            <strong>Clé TomTom manquante</strong>
-                            <small>
-                                Ajoutez votre clé dans le JavaScript.
-                            </small>
-                        </div>
-                    `;
+                    <div class="autocomplete-item">
+                        <strong>❌ Clé TomTom manquante</strong>
+                        <small>Ajoutez votre clé TomTom dans le JavaScript.</small>
+                    </div>`;
 
                     list.classList.add("active");
 
+                    showTomTomError(
+                        "La clé API TomTom n'est pas renseignée."
+                    );
+
                     return;
+
                 }
+
 
                 const url =
                     "https://api.tomtom.com/search/2/search/" +
@@ -1172,47 +1472,69 @@ function setupAddressAutocomplete(inputId, listId) {
                     "&limit=6" +
                     "&typeahead=true";
 
+
                 const response =
                     await fetch(url);
 
-                if (!response.ok) {
+
+                if(!response.ok) {
+
+                    let details = "";
+
+                    try {
+                        const errorData =
+                            await response.json();
+
+                        details =
+                            errorData.detailedError?.message ||
+                            errorData.errorText ||
+                            "";
+                    }
+                    catch(e) {}
+
                     throw new Error(
-                        "TomTom Search : " + response.status
+                        "HTTP " +
+                        response.status +
+                        (details ? " — " + details : "")
                     );
+
                 }
+
 
                 const data =
                     await response.json();
 
+
                 list.innerHTML = "";
 
-                if (
+
+                if(
                     !data.results ||
                     data.results.length === 0
                 ) {
 
                     list.innerHTML = `
-                        <div class="autocomplete-item">
-                            <strong>Aucun résultat</strong>
-                            <small>
-                                Essayez avec une adresse plus précise.
-                            </small>
-                        </div>
-                    `;
+                    <div class="autocomplete-item">
+                        <strong>Aucun résultat</strong>
+                        <small>Essayez avec une adresse plus précise.</small>
+                    </div>`;
 
                     list.classList.add("active");
 
                     return;
+
                 }
+
 
                 data.results.forEach(function(result) {
 
-                    if (
+                    if(
                         !result.position ||
                         !result.address
                     ) {
                         return;
                     }
+
 
                     const item =
                         document.createElement("div");
@@ -1220,13 +1542,16 @@ function setupAddressAutocomplete(inputId, listId) {
                     item.className =
                         "autocomplete-item";
 
+
                     const address =
                         result.address;
+
 
                     const mainText =
                         address.freeformAddress ||
                         result.poi?.name ||
                         "Adresse";
+
 
                     const secondary =
                         [
@@ -1237,10 +1562,12 @@ function setupAddressAutocomplete(inputId, listId) {
                         .filter(Boolean)
                         .join(", ");
 
+
                     item.innerHTML = `
                         <strong>${escapeHtml(mainText)}</strong>
                         <small>${escapeHtml(secondary)}</small>
                     `;
+
 
                     item.addEventListener(
                         "click",
@@ -1251,13 +1578,15 @@ function setupAddressAutocomplete(inputId, listId) {
                                 result.poi?.name ||
                                 "";
 
+
                             input.dataset.lat =
                                 result.position.lat;
 
                             input.dataset.lon =
                                 result.position.lon;
 
-                            if (inputId === "arr") {
+
+                            if(inputId === "arr") {
 
                                 input.dataset.city =
                                     address.municipality ||
@@ -1265,9 +1594,12 @@ function setupAddressAutocomplete(inputId, listId) {
                                     "";
 
                                 updateAffiliateLinks();
+
                             }
 
+
                             list.classList.remove("active");
+
 
                             const dep =
                                 document.getElementById("dep");
@@ -1275,11 +1607,10 @@ function setupAddressAutocomplete(inputId, listId) {
                             const arr =
                                 document.getElementById("arr");
 
-                            if (
+
+                            if(
                                 dep.dataset.lat &&
-                                dep.dataset.lon &&
-                                arr.dataset.lat &&
-                                arr.dataset.lon
+                                arr.dataset.lat
                             ) {
 
                                 calculateRoute();
@@ -1289,62 +1620,73 @@ function setupAddressAutocomplete(inputId, listId) {
                         }
                     );
 
+
                     list.appendChild(item);
 
                 });
 
+
                 list.classList.add("active");
 
-            } catch (error) {
+
+            }
+            catch(error) {
 
                 console.error(error);
 
                 list.innerHTML = `
-                    <div class="autocomplete-item">
-                        <strong>Erreur de recherche</strong>
-                        <small>
-                            Vérifiez votre clé TomTom et ses restrictions.
-                        </small>
-                    </div>
-                `;
+                <div class="autocomplete-item">
+                    <strong>❌ Erreur TomTom</strong>
+                    <small>${escapeHtml(error.message)}</small>
+                </div>`;
 
                 list.classList.add("active");
+
+                showTomTomError(
+                    "La recherche d'adresse TomTom a échoué.",
+                    error.message
+                );
+
             }
 
-        }, 350);
+        },350);
 
     });
 
-    document.addEventListener(
-        "click",
-        function(event) {
 
-            if (
-                event.target !== input &&
-                !list.contains(event.target)
-            ) {
+    document.addEventListener("click",function(event) {
 
-                list.classList.remove("active");
+        if(
+            event.target !== input &&
+            !list.contains(event.target)
+        ) {
 
-            }
+            list.classList.remove("active");
 
         }
-    );
+
+    });
 
 }
 
 
-/* INITIALISATION AUTOCOMPLÉTION */
+setupAddressAutocomplete("dep","depList");
 
-setupAddressAutocomplete("dep", "depList");
-setupAddressAutocomplete("arr", "arrList");
+setupAddressAutocomplete("arr","arrList");
 
 
 /* =========================================================
-   CALCUL ROUTE TOMTOM
+   ROUTING TOMTOM
    ========================================================= */
 
 async function calculateRoute() {
+
+    hideTomTomError();
+
+    document
+        .getElementById("routeSuccess")
+        .classList.remove("active");
+
 
     const dep =
         document.getElementById("dep");
@@ -1355,29 +1697,53 @@ async function calculateRoute() {
     const status =
         document.getElementById("routeStatus");
 
-    if (
+
+    if(
         !dep.dataset.lat ||
         !dep.dataset.lon ||
         !arr.dataset.lat ||
         !arr.dataset.lon
     ) {
 
-        status.innerText =
-            "Sélectionnez une adresse dans les suggestions.";
+        const message =
+            "Sélectionnez une adresse dans les suggestions TomTom.";
+
+        status.innerText = message;
+
+        showTomTomError(message);
+
+        resetResults();
 
         return;
+
     }
 
-    if (!hasTomTomKey()) {
 
-        status.innerText =
-            "Ajoutez votre clé TomTom dans le code.";
+    if(
+        !TOMTOM_API_KEY ||
+        TOMTOM_API_KEY === "COLLE_TA_CLE_ICI"
+    ) {
+
+        const message =
+            "La clé API TomTom est manquante.";
+
+        status.innerText = message;
+
+        showTomTomError(
+            message,
+            "Vérifiez la constante TOMTOM_API_KEY."
+        );
+
+        resetResults();
 
         return;
+
     }
+
 
     status.innerText =
         "⏳ Calcul de l'itinéraire...";
+
 
     const lat1 =
         dep.dataset.lat;
@@ -1391,20 +1757,24 @@ async function calculateRoute() {
     const lon2 =
         arr.dataset.lon;
 
+
     const highway =
         document.getElementById("highway").checked;
 
+
     let avoid = "";
 
-    if (!highway) {
+    if(!highway) {
 
         avoid =
             "&avoid=tollRoads,motorways";
 
     }
 
+
     const locations =
         `${lat1},${lon1}:${lat2},${lon2}`;
+
 
     const url =
         "https://api.tomtom.com/routing/1/calculateRoute/" +
@@ -1416,77 +1786,105 @@ async function calculateRoute() {
         "&travelMode=car" +
         avoid;
 
+
     try {
 
         const response =
             await fetch(url);
 
-        if (!response.ok) {
 
-            throw new Error(
-                "TomTom Routing : " +
-                response.status
-            );
+        let data = null;
+
+        try {
+            data = await response.json();
+        }
+        catch(e) {
+            data = null;
+        }
+
+
+        if(!response.ok) {
+
+            let details =
+                "Erreur HTTP " + response.status;
+
+
+            if(data) {
+
+                details =
+                    data.detailedError?.message ||
+                    data.errorText ||
+                    data.error?.description ||
+                    details;
+
+            }
+
+
+            throw new Error(details);
 
         }
 
-        const data =
-            await response.json();
 
-        if (
+        if(
+            !data ||
             !data.routes ||
             data.routes.length === 0
         ) {
 
             throw new Error(
-                "Aucun itinéraire trouvé."
+                "TomTom n'a trouvé aucun itinéraire."
             );
 
         }
 
+
         const route =
             data.routes[0];
+
+
+        if(!route.summary) {
+
+            throw new Error(
+                "TomTom a retourné un itinéraire sans résumé."
+            );
+
+        }
+
 
         const summary =
             route.summary;
 
+
         const distanceKm =
             summary.lengthInMeters / 1000;
+
 
         const durationMinutes =
             summary.travelTimeInSeconds / 60;
 
-        /*
-         * IMPORTANT :
-         * Cette valeur reste une estimation.
-         * TomTom Routing ne fournit pas ici
-         * un prix officiel de péage.
-         */
 
         let estimatedToll = 0;
 
-        if (highway) {
+
+        if(highway) {
 
             estimatedToll =
                 estimateToll(distanceKm);
 
         }
 
+
         routeData = {
 
-            dep: dep.value,
-
-            arr: arr.value,
-
-            distance: distanceKm,
-
-            duration: durationMinutes,
-
-            toll: estimatedToll,
-
-            motorway: highway
+            dep:dep.value,
+            arr:arr.value,
+            distance:distanceKm,
+            duration:durationMinutes,
+            toll:estimatedToll,
+            motorway:highway
 
         };
+
 
         calculateResults();
 
@@ -1494,16 +1892,28 @@ async function calculateRoute() {
 
         updateAmazonLinks();
 
+
         status.innerText =
             "✓ Itinéraire calculé automatiquement";
 
-    } catch (error) {
 
-        console.error(error);
+        showRouteSuccess();
+
+
+    }
+    catch(error) {
+
+        console.error("TomTom Routing Error:",error);
 
         status.innerText =
-            "Impossible de calculer l'itinéraire. " +
-            "Vérifiez les adresses et votre clé TomTom.";
+            "❌ Impossible de calculer l'itinéraire.";
+
+        showTomTomError(
+            "TomTom n'a pas pu calculer cet itinéraire.",
+            error.message
+        );
+
+        resetResults();
 
     }
 
@@ -1511,22 +1921,45 @@ async function calculateRoute() {
 
 
 /* =========================================================
-   ESTIMATION PÉAGE
+   RESET RESULTATS
+   ========================================================= */
+
+function resetResults() {
+
+    document.getElementById("resTotalCost").innerText = "—";
+    document.getElementById("resFuelCost").innerText = "—";
+    document.getElementById("resToll").innerText = "—";
+    document.getElementById("resCO2").innerText = "—";
+    document.getElementById("resDistance").innerText = "—";
+
+    document.getElementById("valThermique").innerText = "—";
+    document.getElementById("valElec").innerText = "—";
+    document.getElementById("valTrain").innerText = "—";
+
+    document.getElementById("barThermique").style.width = "100%";
+    document.getElementById("barElec").style.width = "20%";
+    document.getElementById("barTrain").style.width = "4%";
+
+}
+
+
+/* =========================================================
+   ESTIMATION PEAGE
    ========================================================= */
 
 function estimateToll(distanceKm) {
 
-    if (distanceKm < 80) {
+    if(distanceKm < 80) {
         return 0;
     }
 
     let rate = 0.085;
 
-    if (distanceKm > 500) {
+    if(distanceKm > 500) {
         rate = 0.075;
     }
 
-    if (distanceKm > 800) {
+    if(distanceKm > 800) {
         rate = 0.07;
     }
 
@@ -1539,7 +1972,7 @@ function estimateToll(distanceKm) {
 
 
 /* =========================================================
-   CALCUL RÉSULTATS
+   CALCUL RESULTATS
    ========================================================= */
 
 function calculateResults() {
@@ -1547,82 +1980,85 @@ function calculateResults() {
     const dist =
         routeData.distance;
 
-    if (!dist) {
+
+    if(!dist) {
         return;
     }
 
+
     const motor =
         document.getElementById("motor").value;
+
 
     const fuelPrice =
         parseFloat(
             document.getElementById("fuelPrice").value
         ) || 0;
 
+
     let consumption = 7;
+
     let co2Factor = 0.190;
 
-    if (motor === "diesel") {
+
+    if(motor === "diesel") {
 
         consumption = 5.8;
         co2Factor = 0.170;
 
-    } else if (motor === "elec") {
+    }
+
+    else if(motor === "elec") {
 
         consumption = 18;
         co2Factor = 0.037;
 
     }
 
+
     const fuelCost =
         (dist / 100) *
         consumption *
         fuelPrice;
 
+
     const toll =
-        routeData.toll || 0;
+        routeData.toll;
+
 
     const totalCost =
         fuelCost + toll;
 
+
     const co2Total =
         dist * co2Factor;
 
-    document.getElementById(
-        "routeTitle"
-    ).innerText =
+
+    document.getElementById("routeTitle").innerText =
         `(${shortName(routeData.dep)} ➔ ${shortName(routeData.arr)})`;
 
-    document.getElementById(
-        "resTotalCost"
-    ).innerText =
+
+    document.getElementById("resTotalCost").innerText =
         totalCost.toFixed(2) + " €";
 
-    document.getElementById(
-        "resFuelCost"
-    ).innerText =
+
+    document.getElementById("resFuelCost").innerText =
         fuelCost.toFixed(2) + " €";
 
-    document.getElementById(
-        "resToll"
-    ).innerText =
-        toll > 0
-            ? toll.toFixed(2) + " €"
-            : "0 €";
 
-    document.getElementById(
-        "resCO2"
-    ).innerText =
+    document.getElementById("resToll").innerText =
+        toll > 0
+        ? toll.toFixed(2) + " €"
+        : "0 €";
+
+
+    document.getElementById("resCO2").innerText =
         Math.round(co2Total) + " kg";
 
-    document.getElementById(
-        "resDistance"
-    ).innerText =
+
+    document.getElementById("resDistance").innerText =
         dist.toFixed(0) + " km";
 
-    /*
-     * CO2 COMPARATIF
-     */
 
     const co2Therm =
         dist * 0.190;
@@ -1633,61 +2069,53 @@ function calculateResults() {
     const co2Train =
         dist * 0.0026;
 
-    document.getElementById(
-        "valThermique"
-    ).innerText =
+
+    document.getElementById("valThermique").innerText =
         Math.round(co2Therm) + " kg CO2";
 
-    document.getElementById(
-        "valElec"
-    ).innerText =
+
+    document.getElementById("valElec").innerText =
         Math.round(co2Elec) + " kg CO2";
 
-    document.getElementById(
-        "valTrain"
-    ).innerText =
-        Math.max(0.1, co2Train).toFixed(1) +
+
+    document.getElementById("valTrain").innerText =
+        Math.max(0.1,co2Train).toFixed(1) +
         " kg CO2";
 
-    const maxCO2 =
-        Math.max(co2Therm, 1);
 
-    document.getElementById(
-        "barThermique"
-    ).style.width =
+    const maxCO2 =
+        Math.max(co2Therm,1);
+
+
+    document.getElementById("barThermique").style.width =
         "100%";
 
-    document.getElementById(
-        "barElec"
-    ).style.width =
+
+    document.getElementById("barElec").style.width =
         Math.max(
             5,
             (co2Elec / maxCO2) * 100
         ) + "%";
 
-    document.getElementById(
-        "barTrain"
-    ).style.width =
+
+    document.getElementById("barTrain").style.width =
         Math.max(
             2,
             (co2Train / maxCO2) * 100
         ) + "%";
 
-    /*
-     * URL PARTAGEABLE
-     */
 
     const url =
         new URL(window.location.href);
 
-    url.searchParams.set(
-        "dep",
-        routeData.dep
-    );
+
+    url.searchParams.set("dep",routeData.dep);
+
+    url.searchParams.set("arr",routeData.arr);
 
     url.searchParams.set(
-        "arr",
-        routeData.arr
+        "dist",
+        dist.toFixed(0)
     );
 
     url.searchParams.set(
@@ -1698,9 +2126,10 @@ function calculateResults() {
     url.searchParams.set(
         "highway",
         document.getElementById("highway").checked
-            ? "1"
-            : "0"
+        ? "1"
+        : "0"
     );
+
 
     window.history.replaceState(
         {},
@@ -1723,7 +2152,7 @@ document
 
             updateFuelPrice();
 
-            if (routeData.distance) {
+            if(routeData.distance) {
                 calculateResults();
             }
 
@@ -1741,17 +2170,9 @@ document
         "change",
         function() {
 
-            const dep =
-                document.getElementById("dep");
-
-            const arr =
-                document.getElementById("arr");
-
-            if (
-                dep.dataset.lat &&
-                dep.dataset.lon &&
-                arr.dataset.lat &&
-                arr.dataset.lon
+            if(
+                document.getElementById("dep").dataset.lat &&
+                document.getElementById("arr").dataset.lat
             ) {
 
                 calculateRoute();
@@ -1781,7 +2202,7 @@ document
 
 
 /* =========================================================
-   VILLE D'ARRIVÉE
+   VILLE ARRIVEE
    ========================================================= */
 
 function getArrivalCity() {
@@ -1789,21 +2210,28 @@ function getArrivalCity() {
     const arr =
         document.getElementById("arr");
 
-    if (arr.dataset.city) {
+
+    if(arr.dataset.city) {
 
         return arr.dataset.city;
 
     }
 
+
     const value =
         arr.value.trim();
 
-    if (!value) {
+
+    if(!value) {
+
         return "";
+
     }
+
 
     const parts =
         value.split(",");
+
 
     return parts[
         parts.length - 1
@@ -1821,43 +2249,28 @@ function updateAffiliateLinks() {
     const city =
         getArrivalCity();
 
-    if (!city) {
+
+    if(!city) {
         return;
     }
+
 
     const encoded =
         encodeURIComponent(city);
 
-    /*
-     * SNCF
-     */
 
-    document.getElementById(
-        "sncfLink"
-    ).href =
-        "https://www.sncf-connect.com/" +
-        "?destination=" +
+    document.getElementById("sncfLink").href =
+        "https://www.sncf-connect.com/?destination=" +
         encoded;
 
-    /*
-     * BOOKING
-     */
 
-    document.getElementById(
-        "hotelLink"
-    ).href =
+    document.getElementById("hotelLink").href =
         "https://www.booking.com/searchresults.html?ss=" +
         encoded;
 
-    /*
-     * LOCATION
-     */
 
-    document.getElementById(
-        "carLink"
-    ).href =
-        "https://www.rentalcars.com/" +
-        "?location=" +
+    document.getElementById("carLink").href =
+        "https://www.rentalcars.com/?location=" +
         encoded;
 
 }
@@ -1881,30 +2294,25 @@ function amazonSearch(query) {
 
 function updateAmazonLinks() {
 
-    document.getElementById(
-        "amazonTrain"
-    ).href =
+    document.getElementById("amazonTrain").href =
         amazonSearch(
             "accessoires voyage train confort"
         );
 
-    document.getElementById(
-        "amazonShort"
-    ).href =
+
+    document.getElementById("amazonShort").href =
         amazonSearch(
             "accessoires voiture petit trajet"
         );
 
-    document.getElementById(
-        "amazonMedium"
-    ).href =
+
+    document.getElementById("amazonMedium").href =
         amazonSearch(
             "accessoires voiture voyage trajet moyen"
         );
 
-    document.getElementById(
-        "amazonLong"
-    ).href =
+
+    document.getElementById("amazonLong").href =
         amazonSearch(
             "accessoires voiture long trajet voyage"
         );
@@ -1916,7 +2324,7 @@ function updateAmazonLinks() {
    PRESETS
    ========================================================= */
 
-function setPreset(dep, arr) {
+function setPreset(dep,arr) {
 
     const depInput =
         document.getElementById("dep");
@@ -1924,38 +2332,49 @@ function setPreset(dep, arr) {
     const arrInput =
         document.getElementById("arr");
 
+
     depInput.value = dep;
     arrInput.value = arr;
 
+
     delete depInput.dataset.lat;
     delete depInput.dataset.lon;
-    delete depInput.dataset.city;
 
     delete arrInput.dataset.lat;
     delete arrInput.dataset.lon;
-    delete arrInput.dataset.city;
 
-    geocodePreset("dep", dep);
-    geocodePreset("arr", arr);
+    geocodePreset("dep",dep);
+    geocodePreset("arr",arr);
 
 }
 
 
-async function geocodePreset(inputId, query) {
+/* =========================================================
+   GEOCODAGE PRESET
+   ========================================================= */
+
+async function geocodePreset(inputId,query) {
 
     const input =
         document.getElementById(inputId);
 
-    if (!hasTomTomKey()) {
-
-        document.getElementById("routeStatus").innerText =
-            "Ajoutez votre clé TomTom dans le code.";
-
-        return;
-
-    }
 
     try {
+
+        if(
+            !TOMTOM_API_KEY ||
+            TOMTOM_API_KEY === "COLLE_TA_CLE_ICI"
+        ) {
+
+            showTomTomError(
+                "La clé API TomTom est manquante.",
+                "Ajoutez votre clé dans TOMTOM_API_KEY."
+            );
+
+            return;
+
+        }
+
 
         const url =
             "https://api.tomtom.com/search/2/search/" +
@@ -1966,71 +2385,91 @@ async function geocodePreset(inputId, query) {
             "&language=fr-FR" +
             "&limit=1";
 
+
         const response =
             await fetch(url);
 
-        if (!response.ok) {
+
+        let data = null;
+
+        try {
+            data = await response.json();
+        }
+        catch(e) {}
+
+
+        if(!response.ok) {
+
+            const details =
+                data?.detailedError?.message ||
+                data?.errorText ||
+                "Erreur HTTP " + response.status;
+
+            throw new Error(details);
+
+        }
+
+
+        if(
+            !data.results ||
+            !data.results.length
+        ) {
 
             throw new Error(
-                "TomTom Search : " +
-                response.status
+                "TomTom n'a trouvé aucun résultat pour : " +
+                query
             );
 
         }
 
-        const data =
-            await response.json();
 
-        if (
-            data.results &&
-            data.results.length
-        ) {
+        const result =
+            data.results[0];
 
-            const result =
-                data.results[0];
 
-            input.dataset.lat =
-                result.position.lat;
+        input.dataset.lat =
+            result.position.lat;
 
-            input.dataset.lon =
-                result.position.lon;
+        input.dataset.lon =
+            result.position.lon;
 
-            if (inputId === "arr") {
 
-                input.dataset.city =
-                    result.address?.municipality ||
-                    result.address?.municipalitySubdivision ||
-                    "";
+        if(inputId === "arr") {
 
-                updateAffiliateLinks();
-
-            }
-
-            const dep =
-                document.getElementById("dep");
-
-            const arr =
-                document.getElementById("arr");
-
-            if (
-                dep.dataset.lat &&
-                dep.dataset.lon &&
-                arr.dataset.lat &&
-                arr.dataset.lon
-            ) {
-
-                calculateRoute();
-
-            }
+            input.dataset.city =
+                result.address?.municipality ||
+                "";
 
         }
 
-    } catch (error) {
+
+        const dep =
+            document.getElementById("dep");
+
+        const arr =
+            document.getElementById("arr");
+
+
+        if(
+            dep.dataset.lat &&
+            arr.dataset.lat
+        ) {
+
+            calculateRoute();
+
+        }
+
+    }
+    catch(error) {
 
         console.error(error);
 
-        document.getElementById("routeStatus").innerText =
-            "Erreur lors de la recherche de l'adresse.";
+        showTomTomError(
+            "Erreur pendant la recherche de l'adresse.",
+            error.message
+        );
+
+        resetResults();
 
     }
 
@@ -2049,6 +2488,7 @@ function copySummary() {
     const arr =
         document.getElementById("arr").value;
 
+
     const text =
 `Trajet : ${dep} → ${arr}
 Distance : ${document.getElementById("resDistance").innerText}
@@ -2057,7 +2497,8 @@ Péage estimé : ${document.getElementById("resToll").innerText}
 Coût total : ${document.getElementById("resTotalCost").innerText}
 CO2 : ${document.getElementById("resCO2").innerText}`;
 
-    if (
+
+    if(
         navigator.clipboard &&
         navigator.clipboard.writeText
     ) {
@@ -2068,65 +2509,27 @@ CO2 : ${document.getElementById("resCO2").innerText}`;
 
                 alert("Résumé copié !");
 
-            })
-            .catch(function() {
-
-                alert(text);
-
             });
-
-    } else {
-
-        alert(text);
 
     }
 
 }
 
 
-async function shareURL() {
+function shareURL() {
 
-    const url =
-        window.location.href;
-
-    if (
-        navigator.share
-    ) {
-
-        try {
-
-            await navigator.share({
-                title: "Mon trajet",
-                text: "Voir mon calcul de trajet",
-                url: url
-            });
-
-        } catch (error) {
-            console.log("Partage annulé.");
-        }
-
-        return;
-    }
-
-    if (
+    if(
         navigator.clipboard &&
         navigator.clipboard.writeText
     ) {
 
         navigator.clipboard
-            .writeText(url)
+            .writeText(window.location.href)
             .then(function() {
 
                 alert("Lien copié !");
 
             });
-
-    } else {
-
-        prompt(
-            "Copiez ce lien :",
-            url
-        );
 
     }
 
@@ -2139,7 +2542,7 @@ async function shareURL() {
 
 function shortName(value) {
 
-    if (!value) {
+    if(!value) {
         return "";
     }
 
@@ -2153,11 +2556,11 @@ function shortName(value) {
 function escapeHtml(value) {
 
     return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 
 }
 
@@ -2171,12 +2574,15 @@ window.addEventListener(
     async function() {
 
         updateFuelPrice();
+
         updateAmazonLinks();
+
 
         const params =
             new URLSearchParams(
                 window.location.search
             );
+
 
         const dep =
             params.get("dep");
@@ -2190,66 +2596,44 @@ window.addEventListener(
         const highway =
             params.get("highway");
 
-        if (motor) {
 
-            const motorSelect =
-                document.getElementById("motor");
+        if(motor) {
 
-            if (
-                motor === "essence" ||
-                motor === "diesel" ||
-                motor === "elec"
-            ) {
-
-                motorSelect.value =
-                    motor;
-
-            }
+            document.getElementById("motor").value =
+                motor;
 
             updateFuelPrice();
 
         }
 
-        /*
-         * IMPORTANT :
-         * Si highway=0, on décoche.
-         * Sinon on laisse coché par défaut.
-         */
 
-        document.getElementById(
-            "highway"
-        ).checked =
-            highway !== "0";
+        if(highway === "0") {
 
-        if (dep) {
+            document.getElementById("highway").checked =
+                false;
 
-            document.getElementById(
-                "dep"
-            ).value =
+        }
+
+
+        if(dep) {
+
+            document.getElementById("dep").value =
                 dep;
 
         }
 
-        if (arr) {
 
-            document.getElementById(
-                "arr"
-            ).value =
+        if(arr) {
+
+            document.getElementById("arr").value =
                 arr;
 
         }
 
-        /*
-         * CORRECTION IMPORTANTE :
-         *
-         * On vérifie uniquement qu'une clé existe.
-         * On ne compare plus la clé à sa propre valeur.
-         */
 
-        if (
+        if(
             dep &&
-            arr &&
-            hasTomTomKey()
+            arr
         ) {
 
             await geocodePreset(
@@ -2271,4 +2655,3 @@ window.addEventListener(
 
 </body>
 </html>
-```

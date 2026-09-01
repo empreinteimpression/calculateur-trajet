@@ -170,6 +170,41 @@
             border-color: var(--primary);
         }
 
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-list.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.6rem 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .autocomplete-item:hover {
+            background: #f0f4f8;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
         .btn {
             display: inline-block;
             width: 100%;
@@ -255,11 +290,6 @@
             margin-top: 1.5rem;
         }
 
-        .affiliate-box.insurance {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            border-color: #a7f3d0;
-        }
-
         .affiliate-box h3 {
             font-size: 1.1rem;
             color: var(--dark);
@@ -273,17 +303,13 @@
 
         .affiliate-btn {
             display: inline-block;
-            background-color: var(--primary);
+            background-color: var(--secondary);
             color: white;
             padding: 0.6rem 1.2rem;
             border-radius: 6px;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.9rem;
-        }
-
-        .affiliate-btn.green {
-            background-color: var(--secondary);
         }
 
         /* Partage */
@@ -316,6 +342,12 @@
         .seo-content h3 { margin: 1.2rem 0 0.5rem 0; color: var(--dark); }
         .faq-item { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.8rem; }
         .faq-question { font-weight: 600; }
+
+        .loading-prices {
+            font-size: 0.75rem;
+            color: #10b981;
+            margin-top: 0.25rem;
+        }
     </style>
 </head>
 <body>
@@ -336,11 +368,11 @@
         <!-- Trajets populaires pré-remplis -->
         <div class="presets-bar">
             <span class="presets-title">Trajets populaires :</span>
-            <button class="chip" onclick="setPreset('Paris', 'Lyon', 465, 38.5)">Paris ➔ Lyon</button>
-            <button class="chip" onclick="setPreset('Marseille', 'Nice', 200, 19.2)">Marseille ➔ Nice</button>
-            <button class="chip" onclick="setPreset('Toulouse', 'Bordeaux', 245, 21.0)">Toulouse ➔ Bordeaux</button>
-            <button class="chip" onclick="setPreset('Paris', 'Nantes', 385, 31.8)">Paris ➔ Nantes</button>
-            <button class="chip" onclick="setPreset('Lille', 'Paris', 220, 17.5)">Lille ➔ Paris</button>
+            <button class="chip" onclick="setPreset('Paris', 'Lyon', 465)">Paris ➔ Lyon</button>
+            <button class="chip" onclick="setPreset('Marseille', 'Nice', 200)">Marseille ➔ Nice</button>
+            <button class="chip" onclick="setPreset('Toulouse', 'Bordeaux', 245)">Toulouse ➔ Bordeaux</button>
+            <button class="chip" onclick="setPreset('Paris', 'Nantes', 385)">Paris ➔ Nantes</button>
+            <button class="chip" onclick="setPreset('Lille', 'Paris', 220)">Lille ➔ Paris</button>
         </div>
 
         <div class="main-grid">
@@ -350,13 +382,19 @@
                 <h2>🚗 Votre Itinéraire</h2>
                 <form id="routeForm" onsubmit="event.preventDefault(); calculateRoute();">
                     <div class="form-group">
-                        <label for="dep">Ville de Départ</label>
-                        <input type="text" id="dep" class="form-control" value="Paris" placeholder="Ex: Paris" required>
+                        <label for="dep">Adresse de Départ</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="dep" class="form-control" placeholder="Ex: 123 Rue de la Paix, Paris" required autocomplete="off">
+                            <div class="autocomplete-list" id="depList"></div>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="arr">Ville d'Arrivée</label>
-                        <input type="text" id="arr" class="form-control" value="Lyon" placeholder="Ex: Lyon" required>
+                        <label for="arr">Adresse d'Arrivée</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="arr" class="form-control" placeholder="Ex: 456 Avenue de la Liberté, Lyon" required autocomplete="off">
+                            <div class="autocomplete-list" id="arrList"></div>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -365,13 +403,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="peage">Péages estimés (€)</label>
-                        <input type="number" step="0.1" id="peage" class="form-control" value="38.5">
-                    </div>
-
-                    <div class="form-group">
                         <label for="motor">Motorisation</label>
-                        <select id="motor" class="form-control">
+                        <select id="motor" class="form-control" onchange="updateFuelPrice()">
                             <option value="essence">Essence (7.0 L / 100km)</option>
                             <option value="diesel">Diesel (5.8 L / 100km)</option>
                             <option value="elec">Électrique (18 kWh / 100km)</option>
@@ -380,7 +413,8 @@
 
                     <div class="form-group">
                         <label for="fuelPrice">Prix du carburant/kWh (€)</label>
-                        <input type="number" step="0.01" id="fuelPrice" class="form-control" value="1.85">
+                        <input type="number" step="0.01" id="fuelPrice" class="form-control" value="2.06" readonly>
+                        <div class="loading-prices" id="loadingPrices">✓ Prix temps réel</div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Calculer le Trajet</button>
@@ -389,7 +423,7 @@
 
             <!-- Résultats et Comparatifs -->
             <section class="card">
-                <h2>📊 Récapitulatif <span id="routeTitle" style="font-size:0.9rem; font-weight:normal; color:var(--text-light);">(Paris ➔ Lyon)</span></h2>
+                <h2>📊 Récapitulatif <span id="routeTitle" style="font-size:0.9rem; font-weight:normal; color:var(--text-light);">(Départ ➔ Arrivée)</span></h2>
                 
                 <div class="results-summary">
                     <div class="metric-box">
@@ -401,12 +435,12 @@
                         <div class="metric-label">Carburant</div>
                     </div>
                     <div class="metric-box">
-                        <div class="metric-value" id="resPeage">38.50 €</div>
-                        <div class="metric-label">Péage</div>
-                    </div>
-                    <div class="metric-box">
                         <div class="metric-value" id="resCO2">87 kg</div>
                         <div class="metric-label">CO2 Émis</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="resDistance">465 km</div>
+                        <div class="metric-label">Distance</div>
                     </div>
                 </div>
 
@@ -447,18 +481,11 @@
                     </div>
                 </div>
 
-                <!-- MONÉTISATION 1 : Assurance Auto -->
-                <div class="affiliate-box insurance">
-                    <h3>🛡️ Prêt pour les longs trajets ?</h3>
-                    <p>Pensez à l'assistance panne 0 km. Comparez les meilleures assurances auto et économisez jusqu'à 350€/an.</p>
-                    <a href="https://votre-lien-affiliation-assurance.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn green">Comparer les Assurances Auto ➔</a>
-                </div>
-
-                <!-- MONÉTISATION 2 : Télépéage -->
+                <!-- AFFILIATION SNCF -->
                 <div class="affiliate-box">
-                    <h3>⚡ Évitez les files d'attente aux péages</h3>
-                    <p>Passez sans vous arrêter avec le badge Télépéage Ulys. 12 mois offerts avec notre lien partenaire.</p>
-                    <a href="https://votre-lien-affiliation-telepeage.com" target="_blank" rel="nofollow sponsored" class="affiliate-btn">Obtenir le Badge Télépéage ➔</a>
+                    <h3>🚆 Voyagez en Train</h3>
+                    <p>Comparez les tarifs SNCF et découvrez les offres spéciales pour votre destination.</p>
+                    <a id="sncfLink" href="https://www.sncf-connect.com/" target="_blank" rel="nofollow sponsored" class="affiliate-btn">Voir les Tarifs SNCF ➔</a>
                 </div>
             </section>
         </div>
@@ -480,19 +507,141 @@
                 <div class="faq-answer">Le calcul s'appuie sur les données officielles de l'ADEME (Base Carbone).</div>
             </div>
             <div class="faq-item">
-                <div class="faq-question">Pourquoi souscrire une assurance auto avec assistance 0 km ?</div>
-                <div class="faq-answer">En cas de panne sur autoroute, la prise en charge peut être très coûteuse sans option d'assistance adaptée dans votre contrat.</div>
+                <div class="faq-question">Pourquoi comparer avec le train ?</div>
+                <div class="faq-answer">Le train émet beaucoup moins de CO2 par passager que la voiture individuelle. C'est une alternative écologique pour les longs trajets.</div>
             </div>
         </article>
 
     </main>
 
     <script>
+        // Prix du carburant selon motorisation (Sept 2026)
+        const fuelPrices = {
+            essence: 2.06,
+            diesel: 2.23,
+            elec: 0.26
+        };
+
+        // Fonction pour mettre à jour le prix du carburant selon la motorisation
+        function updateFuelPrice() {
+            const motor = document.getElementById('motor').value;
+            const price = fuelPrices[motor] || 2.06;
+            document.getElementById('fuelPrice').value = price.toFixed(2);
+        }
+
+        // Autocomplétion d'adresses précises avec Nominatim (OpenStreetMap)
+        function setupAddressAutocomplete(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+            let autocompleteTimeout;
+
+            input.addEventListener('input', function() {
+                clearTimeout(autocompleteTimeout);
+                const value = this.value.trim();
+                list.innerHTML = '';
+
+                if (value.length < 3) {
+                    list.classList.remove('active');
+                    return;
+                }
+
+                autocompleteTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value + ', France')}&limit=5&countrycodes=fr&addressdetails=1`
+                        );
+                        const results = await response.json();
+
+                        if (results.length > 0) {
+                            list.innerHTML = '';
+                            results.forEach(result => {
+                                const item = document.createElement('div');
+                                item.className = 'autocomplete-item';
+                                const displayName = result.display_name.split(',').slice(0, 3).join(',').trim();
+                                item.innerHTML = `<strong>${displayName}</strong>`;
+                                
+                                item.onclick = () => {
+                                    input.value = displayName;
+                                    input.dataset.lat = result.lat;
+                                    input.dataset.lon = result.lon;
+                                    list.classList.remove('active');
+                                    
+                                    // Auto-calculer distance si les 2 adresses sont définies
+                                    if (document.getElementById('dep').dataset.lat && document.getElementById('arr').dataset.lat) {
+                                        autoCalculateDistance();
+                                    }
+                                };
+                                list.appendChild(item);
+                            });
+                            list.classList.add('active');
+                        }
+                    } catch (error) {
+                        console.error('Erreur autocomplétion:', error);
+                    }
+                }, 300);
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target !== input) {
+                    list.classList.remove('active');
+                }
+            });
+        }
+
+        setupAddressAutocomplete('dep', 'depList');
+        setupAddressAutocomplete('arr', 'arrList');
+
+        // Calculer la distance avec OSRM (gratuit, pas d'API key)
+        async function autoCalculateDistance() {
+            const depInput = document.getElementById('dep');
+            const arrInput = document.getElementById('arr');
+
+            if (!depInput.dataset.lat || !arrInput.dataset.lat) return;
+
+            const lat1 = parseFloat(depInput.dataset.lat);
+            const lon1 = parseFloat(depInput.dataset.lon);
+            const lat2 = parseFloat(arrInput.dataset.lat);
+            const lon2 = parseFloat(arrInput.dataset.lon);
+
+            try {
+                const response = await fetch(
+                    `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`
+                );
+                const data = await response.json();
+
+                if (data.routes && data.routes.length > 0) {
+                    const distanceKm = Math.round(data.routes[0].distance / 1000);
+                    document.getElementById('dist').value = distanceKm;
+                    updateSNCFLink();
+                }
+            } catch (error) {
+                console.error('Erreur calcul distance:', error);
+            }
+        }
+
+        // Mettre à jour le lien SNCF avec la destination
+        function updateSNCFLink() {
+            const arrInput = document.getElementById('arr');
+            const destination = arrInput.value.split(',')[0].trim();
+            const sncfLink = document.getElementById('sncfLink');
+            
+            if (destination) {
+                sncfLink.href = `https://www.sncf-connect.com/search/${encodeURIComponent(destination)}`;
+            }
+        }
+
+        // Preset trajets populaires
+        function setPreset(dep, arr, dist) {
+            document.getElementById('dep').value = dep;
+            document.getElementById('arr').value = arr;
+            document.getElementById('dist').value = dist;
+            calculateRoute();
+        }
+
         function calculateRoute() {
             const dep = document.getElementById('dep').value;
             const arr = document.getElementById('arr').value;
             const dist = parseFloat(document.getElementById('dist').value) || 0;
-            const peage = parseFloat(document.getElementById('peage').value) || 0;
             const motor = document.getElementById('motor').value;
             const fuelPrice = parseFloat(document.getElementById('fuelPrice').value) || 0;
 
@@ -503,14 +652,14 @@
             else if (motor === 'elec') { consump = 18; co2Factor = 0.037; }
 
             const fuelCost = (dist / 100) * consump * fuelPrice;
-            const totalCost = fuelCost + peage;
+            const totalCost = fuelCost;
             const co2Total = dist * co2Factor;
 
-            document.getElementById('routeTitle').innerText = `(${dep} ➔ ${arr})`;
+            document.getElementById('routeTitle').innerText = `(${dep.split(',')[0]} ➔ ${arr.split(',')[0]})`;
             document.getElementById('resTotalCost').innerText = totalCost.toFixed(2) + ' €';
             document.getElementById('resFuelCost').innerText = fuelCost.toFixed(2) + ' €';
-            document.getElementById('resPeage').innerText = peage.toFixed(2) + ' €';
             document.getElementById('resCO2').innerText = Math.round(co2Total) + ' kg';
+            document.getElementById('resDistance').innerText = dist + ' km';
 
             const co2Therm = Math.round(dist * 0.190);
             const co2Elec = Math.round(dist * 0.037);
@@ -527,3 +676,34 @@
 
             const url = new URL(window.location);
             url.searchParams.set('dep', dep);
+            url.searchParams.set('arr', arr);
+            url.searchParams.set('dist', dist);
+            url.searchParams.set('motor', motor);
+            window.history.pushState({}, '', url);
+        }
+
+        function copySummary() {
+            const dep = document.getElementById('dep').value;
+            const arr = document.getElementById('arr').value;
+            const text = `Trajet: ${dep} → ${arr}\nCoût total: ${document.getElementById('resTotalCost').innerText}\nCarburant: ${document.getElementById('resFuelCost').innerText}\nCO2: ${document.getElementById('resCO2').innerText}`;
+            navigator.clipboard.writeText(text).then(() => alert('Résumé copié!'));
+        }
+
+        function shareURL() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => alert('Lien copié!'));
+        }
+
+        // Charger les paramètres de l'URL au chargement
+        window.addEventListener('load', function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('dep')) document.getElementById('dep').value = params.get('dep');
+            if (params.get('arr')) document.getElementById('arr').value = params.get('arr');
+            if (params.get('dist')) document.getElementById('dist').value = params.get('dist');
+            if (params.get('motor')) document.getElementById('motor').value = params.get('motor');
+            updateFuelPrice();
+            if (params.get('dep') && params.get('arr')) calculateRoute();
+        });
+    </script>
+</body>
+</html>
